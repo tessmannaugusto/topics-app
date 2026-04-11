@@ -1,0 +1,12 @@
+{
+  "name": "topics",
+  "version": "1.0.0",
+  "description": "app to enhance topics notes and learning",
+  "license": "ISC",
+  "author": "aty",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
