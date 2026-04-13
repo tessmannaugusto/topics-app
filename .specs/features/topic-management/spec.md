@@ -53,16 +53,16 @@ Users need a simple way to create and manage their study topics and notes within
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| TOPIC-01 | P1: Manage Topics (List) | Design | Pending |
-| TOPIC-02 | P1: Manage Topics (Create) | Design | Pending |
-| TOPIC-03 | P1: Manage Topics (Read/View) | Design | Pending |
-| TOPIC-04 | P1: Manage Topics (Update/Edit) | Design | Pending |
-| TOPIC-05 | P1: Manage Topics (Delete) | Design | Pending |
-| TOPIC-06 | P1: Manage Topics (Persistence) | Design | Pending |
+| TOPIC-01 | P1: Manage Topics (List) | Execute | Verified |
+| TOPIC-02 | P1: Manage Topics (Create) | Execute | Verified |
+| TOPIC-03 | P1: Manage Topics (Read/View) | Execute | Verified |
+| TOPIC-04 | P1: Manage Topics (Update/Edit) | Execute | Verified |
+| TOPIC-05 | P1: Manage Topics (Delete) | Execute | Verified |
+| TOPIC-06 | P1: Manage Topics (Persistence) | Execute | Verified |
 
 **Status values**: Pending → In Design → In Tasks → Implementing → Verified
 
-**Coverage**: 6 total, 0 mapped to tasks, 0 unmapped
+**Coverage**: 6 total, 6 mapped to tasks, 6 verified
 
 ---
 

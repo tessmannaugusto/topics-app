@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Button, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
-import { getTopicById, deleteTopic, Topic } from '../src/storage/topic-storage';
+import { getTopicById, deleteTopic, saveTopic, Topic } from '../src/storage/topic-storage';
+import { API_URL } from '../src/config';
 
 export default function TopicDetail() {
   const { id } = useLocalSearchParams();
   const [topic, setTopic] = useState<Topic | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const router = useRouter();
 
   const loadTopic = async () => {
@@ -24,6 +26,56 @@ export default function TopicDetail() {
       loadTopic();
     }, [id])
   );
+
+  const handleGenerateScript = async () => {
+    if (!topic) return;
+
+    if (topic.aiScript) {
+      Alert.alert(
+        'Regenerate Script',
+        'A script already exists. Do you want to overwrite it?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Overwrite', onPress: () => performGeneration() },
+        ]
+      );
+    } else {
+      performGeneration();
+    }
+  };
+
+  const performGeneration = async () => {
+    if (!topic) return;
+    setIsGenerating(true);
+
+    try {
+      const response = await fetch(`${API_URL}/generate-script`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: topic.name,
+          notes: topic.notes,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const updatedTopic = { ...topic, aiScript: data.aiScript };
+        await saveTopic(updatedTopic);
+        setTopic(updatedTopic);
+        Alert.alert('Success', 'AI Script generated successfully!');
+      } else {
+        throw new Error(data.error || 'Failed to generate script');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleDelete = async () => {
     Alert.alert(
@@ -62,6 +114,16 @@ export default function TopicDetail() {
       )}
 
       <View style={styles.actions}>
+        {isGenerating ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <Button 
+            title={topic.aiScript ? "Regenerate AI Script" : "Generate AI Script"} 
+            onPress={handleGenerateScript}
+            disabled={!topic.notes || topic.notes.trim().length === 0}
+          />
+        )}
+        <View style={styles.spacer} />
         <Button title="Edit Topic" onPress={() => router.push(`/edit/${topic.id}`)} />
         <View style={styles.spacer} />
         <Button title="Delete Topic" color="red" onPress={handleDelete} />
@@ -99,7 +161,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     marginTop: 32,
-    marginBottom: 32,
+    marginBottom: 64,
   },
   spacer: {
     height: 12,

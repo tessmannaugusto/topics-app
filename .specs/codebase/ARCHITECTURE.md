@@ -2,14 +2,19 @@
 
 ## System Overview
 
-The application will follow a client-server architecture if a backend is required for secure API calls to Google Cloud and AI services.
+The system is organized as a monorepo-style project with separate `frontend` and `backend` directories. This structure ensures clear separation of concerns between the mobile client and the secure API proxy.
 
-## Components (Planned)
+## Components
 
-1. **Mobile App (React Native):** UI for topic management, audio playback, and user interactions.
-2. **Backend API (Node.js/TS):** Handles TTS generation and AI script processing.
-3. **Google Cloud TTS:** External service for audio generation.
-4. **AI Service:** External service (Gemini/OpenAI) for content enhancement.
+1. **Mobile App (frontend/):** React Native / Expo.
+    - Manages local topic storage.
+    - Provides UI for creating and viewing notes.
+    - Communicates with the backend for AI script and audio generation.
+2. **Backend API (backend/):** Node.js / Express.
+    - Acts as a secure proxy for Gemini AI and Google Cloud TTS.
+    - Handles prompt engineering and script transformation logic.
+3. **Google Cloud TTS:** External service for high-quality audio generation.
+4. **Gemini AI:** External service for transforming notes into educational scripts.
 
 ## Data Flow
 

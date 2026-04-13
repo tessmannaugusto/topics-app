@@ -7,20 +7,23 @@
 | 2026-04-11 | Android via React Native | User preference for Android app and React Native/TS stack. |
 | 2026-04-11 | Node.js/TS Backend | Decided to use Node.js if a backend is needed for API proxying or storage. |
 | 2026-04-11 | Google TTS for Audio | User specifically requested Google TTS for .mp3 generation. |
+| 2026-04-13 | Mono-repo for Backend | Setup backend in `/backend` folder. |
+| 2026-04-13 | Google Gemini for Scripting | User preference for Gemini over OpenAI. |
 
 ## Blockers
 
-- [ ] Need Google Cloud credentials/API key for TTS.
-- [ ] Need AI API key (OpenAI/Gemini/etc.) for script generation.
+- [ ] Need Google Cloud credentials/API key for TTS (Integration pending).
+- [ ] Need Gemini API key for script generation.
 
 ## Lessons Learned
 
-- (None yet)
+- Expo `Constants.expoConfig?.hostUri` is useful for identifying the local machine's IP for backend communication during dev.
 
 ## Todos
 
 - [x] Initialize React Native project.
-- [ ] Define backend architecture (Serverless vs. Express).
+- [x] Define backend architecture (Express in /backend).
+- [x] Implement AI Script Generation (Logic + UI).
 - [ ] Research Google TTS React Native integration options.
 
 ## Deferred Ideas
