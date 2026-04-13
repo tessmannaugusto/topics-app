@@ -24,6 +24,8 @@
 - [x] Initialize React Native project.
 - [x] Define backend architecture (Express in /backend).
 - [x] Implement AI Script Generation (Logic + UI).
+- [x] Implement Advanced Script Regeneration with User Instructions.
+- [x] Add "Back to Topics" navigation to Topic Detail.
 - [ ] Research Google TTS React Native integration options.
 
 ## Deferred Ideas

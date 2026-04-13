@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Button, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Button, ScrollView, Alert, ActivityIndicator, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { getTopicById, deleteTopic, saveTopic, Topic } from '../src/storage/topic-storage';
 import { API_URL } from '../src/config';
@@ -8,6 +8,7 @@ export default function TopicDetail() {
   const { id } = useLocalSearchParams();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [instructions, setInstructions] = useState('');
   const router = useRouter();
 
   const loadTopic = async () => {
@@ -57,6 +58,7 @@ export default function TopicDetail() {
         body: JSON.stringify({
           name: topic.name,
           notes: topic.notes,
+          instructions: instructions,
         }),
       });
 
@@ -66,6 +68,7 @@ export default function TopicDetail() {
         const updatedTopic = { ...topic, aiScript: data.aiScript };
         await saveTopic(updatedTopic);
         setTopic(updatedTopic);
+        setInstructions(''); // Clear instructions after success
         Alert.alert('Success', 'AI Script generated successfully!');
       } else {
         throw new Error(data.error || 'Failed to generate script');
@@ -110,6 +113,15 @@ export default function TopicDetail() {
         <>
           <Text style={styles.label}>AI Script:</Text>
           <Text style={styles.notes}>{topic.aiScript}</Text>
+          
+          <Text style={styles.label}>Regeneration Instructions (Optional):</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Example: Make it 30% smaller, less fillers..."
+            value={instructions}
+            onChangeText={setInstructions}
+            multiline
+          />
         </>
       )}
 
@@ -165,5 +177,15 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    backgroundColor: '#f9f9f9',
   },
 });

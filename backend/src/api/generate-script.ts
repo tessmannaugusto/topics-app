@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const generateScript = async (req: Request, res: Response) => {
-  const { name, notes } = req.body;
+  const { name, notes, instructions } = req.body;
 
   if (!name || !notes) {
     return res.status(400).json({ error: 'Topic name and notes are required.' });
@@ -23,6 +23,9 @@ export const generateScript = async (req: Request, res: Response) => {
       
       TOPIC: ${name}
       NOTES: ${notes}
+      
+      ${instructions ? `ADDITIONAL USER INSTRUCTIONS FOR REGENERATION:
+      ${instructions}` : ''}
       
       GUIDELINES:
       - Use a conversational, educational tone.
