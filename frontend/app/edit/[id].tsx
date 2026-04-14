@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getTopicById, saveTopic, Topic } from '../../src/storage/topic-storage';
+import { formStyles as styles } from '../../src/styles/form.styles';
 
 export default function EditTopic() {
   const { id } = useLocalSearchParams();
@@ -64,28 +65,3 @@ export default function EditTopic() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    borderRadius: 4,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 150,
-    textAlignVertical: 'top',
-  },
-});
