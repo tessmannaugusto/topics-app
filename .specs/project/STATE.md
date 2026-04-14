@@ -13,7 +13,6 @@
 ## Blockers
 
 - [ ] Need Google Cloud credentials/API key for TTS (Integration pending).
-- [ ] Need Gemini API key for script generation.
 
 ## Lessons Learned
 
@@ -26,7 +25,10 @@
 - [x] Implement AI Script Generation (Logic + UI).
 - [x] Implement Advanced Script Regeneration with User Instructions.
 - [x] Add "Back to Topics" navigation to Topic Detail.
-- [ ] Research Google TTS React Native integration options.
+- [x] Setup TTS Backend Proxy endpoint (Pending credentials for logic).
+- [x] Implement initial Audio Player in Topic Detail.
+- [ ] Research Google TTS React Native integration options. (Done: Decided on Backend Proxy).
+- [ ] Implement advanced Audio Player with seeking.
 
 ## Deferred Ideas
 

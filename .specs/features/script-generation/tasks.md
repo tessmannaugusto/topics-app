@@ -3,8 +3,8 @@
 ## Status
 
 - Total: 6
-- Complete: 5
-- Remaining: 1
+- Complete: 6
+- Remaining: 0
 - Blocked: 0
 
 ## Task List
@@ -19,4 +19,4 @@
 - [x] [SCRIPT-T05] Add "Regenerate" functionality with a confirmation dialog if a script already exists. (Depends on: SCRIPT-T04) [Done when: User can replace an existing script with a new one.] [Tests: -] [Gate: -]
 
 ### Validation
-- [ ] [SCRIPT-T06] Perform end-to-end test of script generation. (Depends on: SCRIPT-T04) [Done when: A full flow from creating a topic to generating a script works correctly.] [Tests: Manual UAT.] [Gate: -]
+- [x] [SCRIPT-T06] Perform end-to-end test of script generation. (Depends on: SCRIPT-T04) [Done when: A full flow from creating a topic to generating a script works correctly.] [Tests: Manual UAT / curl test for backend.] [Gate: -]

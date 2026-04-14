@@ -3,12 +3,17 @@ import { View, Text, StyleSheet, Button, ScrollView, Alert, ActivityIndicator, T
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { getTopicById, deleteTopic, saveTopic, Topic } from '../src/storage/topic-storage';
 import { API_URL } from '../src/config';
+import * as FileSystem from 'expo-file-system';
+import { Audio } from 'expo-av';
 
 export default function TopicDetail() {
   const { id } = useLocalSearchParams();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [instructions, setInstructions] = useState('');
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const router = useRouter();
 
   const loadTopic = async () => {
@@ -25,7 +30,12 @@ export default function TopicDetail() {
   useFocusEffect(
     useCallback(() => {
       loadTopic();
-    }, [id])
+      return () => {
+        if (sound) {
+          sound.unloadAsync();
+        }
+      };
+    }, [id, sound])
   );
 
   const handleGenerateScript = async () => {
@@ -80,6 +90,86 @@ export default function TopicDetail() {
     }
   };
 
+  const handleGenerateAudio = async () => {
+    if (!topic || !topic.aiScript) return;
+    setIsGeneratingAudio(true);
+
+    try {
+      const response = await fetch(`${API_URL}/generate-audio`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: topic.id,
+          script: topic.aiScript,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to generate audio');
+      }
+
+      // Download the audio file
+      const fileUri = `${FileSystem.documentDirectory}${topic.id}.mp3`;
+      
+      // We need to use base64 for now as expo-file-system downloadAsync 
+      // is usually for GET. For POST with binary, we might need to handle it differently.
+      // But since our backend returns binary, we'll try to use a blob/base64 approach.
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64data = (reader.result as string).split(',')[1];
+        await FileSystem.writeAsStringAsync(fileUri, base64data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        const updatedTopic = { ...topic, audioFileUri: fileUri };
+        await saveTopic(updatedTopic);
+        setTopic(updatedTopic);
+        Alert.alert('Success', 'Audio generated and saved!');
+      };
+      reader.readAsDataURL(blob);
+
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setIsGeneratingAudio(false);
+    }
+  };
+
+  const playSound = async () => {
+    if (!topic?.audioFileUri) return;
+
+    try {
+      if (sound) {
+        if (isPlaying) {
+          await sound.pauseAsync();
+          setIsPlaying(false);
+        } else {
+          await sound.playAsync();
+          setIsPlaying(true);
+        }
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: topic.audioFileUri },
+          { shouldPlay: true }
+        );
+        setSound(newSound);
+        setIsPlaying(true);
+        
+        newSound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setIsPlaying(false);
+          }
+        });
+      }
+    } catch (error: any) {
+      Alert.alert('Error playing sound', error.message);
+    }
+  };
+
   const handleDelete = async () => {
     Alert.alert(
       'Delete Topic',
@@ -125,6 +215,17 @@ export default function TopicDetail() {
         </>
       )}
 
+      {topic.audioFileUri && (
+        <View style={styles.audioSection}>
+          <Text style={styles.label}>Audiobook ready!</Text>
+          <Button 
+            title={isPlaying ? "Pause Audio" : "Play Audio"} 
+            onPress={playSound} 
+            color="#4CAF50"
+          />
+        </View>
+      )}
+
       <View style={styles.actions}>
         {isGenerating ? (
           <ActivityIndicator size="large" color="#0000ff" />
@@ -135,7 +236,24 @@ export default function TopicDetail() {
             disabled={!topic.notes || topic.notes.trim().length === 0}
           />
         )}
+        
         <View style={styles.spacer} />
+        
+        {topic.aiScript && (
+          <>
+            {isGeneratingAudio ? (
+              <ActivityIndicator size="large" color="#4CAF50" />
+            ) : (
+              <Button 
+                title={topic.audioFileUri ? "Regenerate Audio" : "Generate Audio"} 
+                onPress={handleGenerateAudio}
+                color="#4CAF50"
+              />
+            )}
+            <View style={styles.spacer} />
+          </>
+        )}
+        
         <Button title="Edit Topic" onPress={() => router.push(`/edit/${topic.id}`)} />
         <View style={styles.spacer} />
         <Button title="Delete Topic" color="red" onPress={handleDelete} />
@@ -143,6 +261,58 @@ export default function TopicDetail() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  date: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  notes: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+  },
+  actions: {
+    marginTop: 32,
+    marginBottom: 64,
+  },
+  spacer: {
+    height: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    backgroundColor: '#f9f9f9',
+  },
+  audioSection: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#e8f5e9',
+    borderRadius: 8,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

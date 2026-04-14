@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { generateScript } from './api/generate-script';
+import apiRoutes from './routes';
 
 dotenv.config();
 
@@ -16,8 +16,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Script generation endpoint
-app.post('/api/generate-script', generateScript);
+// API Routes
+app.use('/api', apiRoutes);
 
 app.listen(port, () => {
   console.log(`Backend listening at http://localhost:${port}`);

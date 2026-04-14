@@ -1,30 +1,32 @@
 # Roadmap
 
 **Current Milestone:** Milestone 1: Core Audio Experience (MVP)
-**Status:** Planning
+**Status:** In Progress
 
 ---
 
 ## Milestone 1: Core Audio Experience (MVP)
 
 **Goal:** A basic Android app that can turn text notes into a playable audiobook using AI and Google TTS.
-**Target:** Functional prototype on Android.
+**Status:** In Progress
 
 ### Features
 
-**Topic & Note Management** - PLANNED
+**Topic & Note Management** - DONE
 - Create topics.
 - Add/Edit text notes for each topic.
 
-**AI Script Generator** - PLANNED
+**AI Script Generator** - DONE
 - Transform raw notes into "audiobook language" scripts.
 - Include practical examples in the script.
 
-**TTS Audio Generator** - PLANNED
-- Integrate Google Cloud TTS to convert scripts to MP3.
+**TTS Audio Generator** - IN PROGRESS
+- Integrate Google Cloud TTS to convert scripts to MP3 (Skeleton done, pending credentials).
+- Save audio files locally on the device (Done).
 
-**Audio Player** - PLANNED
-- Basic playback controls (Play/Pause/Seek).
+**Audio Player** - IN PROGRESS
+- Basic playback controls (Play/Pause).
+- Seek functionality (Planned).
 
 ---
 
