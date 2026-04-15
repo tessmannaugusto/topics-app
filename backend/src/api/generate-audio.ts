@@ -1,7 +1,20 @@
 import { Request, Response } from 'express';
 import textToSpeech from '@google-cloud/text-to-speech';
 
-const client = new textToSpeech.TextToSpeechClient();
+let client: any = null;
+
+const getClient = () => {
+  if (!client) {
+    const apiKey = process.env.GOOGLE_TTS_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured on the server.');
+    }
+    client = new textToSpeech.TextToSpeechClient({
+      apiKey: apiKey,
+    });
+  }
+  return client;
+};
 
 export const generateAudio = async (req: Request, res: Response) => {
   const { id, script } = req.body;
@@ -11,6 +24,7 @@ export const generateAudio = async (req: Request, res: Response) => {
   }
 
   try {
+    const ttsClient = getClient();
     const request = {
       input: { text: script },
       voice: { 
@@ -20,7 +34,7 @@ export const generateAudio = async (req: Request, res: Response) => {
       audioConfig: { audioEncoding: 'MP3' as const },
     };
 
-    const [response] = await client.synthesizeSpeech(request);
+    const [response] = await ttsClient.synthesizeSpeech(request);
 
     if (!response.audioContent) {
       throw new Error('No audio content received from Google Cloud TTS');

@@ -1,11 +1,33 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, Button, ScrollView, Alert, ActivityIndicator, TextInput } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, Button, ScrollView, Alert, ActivityIndicator, TextInput, Platform, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { getTopicById, deleteTopic, saveTopic, Topic } from '../src/storage/topic-storage';
 import { API_URL } from '../src/config';
 import * as FileSystem from 'expo-file-system/legacy';
-import { Audio } from 'expo-av';
+import { Audio, AVPlaybackStatus } from 'expo-av';
 import { styles } from './[id].styles';
+
+// Helper for compatible alerts
+const customAlert = (title: string, message: string, onConfirm?: () => void) => {
+  if (Platform.OS === 'web') {
+    if (onConfirm) {
+      if (window.confirm(`${title}\n\n${message}`)) {
+        onConfirm();
+      }
+    } else {
+      window.alert(`${title}\n\n${message}`);
+    }
+  } else {
+    if (onConfirm) {
+      Alert.alert(title, message, [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: onConfirm },
+      ]);
+    } else {
+      Alert.alert(title, message);
+    }
+  }
+};
 
 export default function TopicDetail() {
   const { id } = useLocalSearchParams();
@@ -15,6 +37,12 @@ export default function TopicDetail() {
   const [instructions, setInstructions] = useState('');
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Audio player state
+  const [position, setPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isSeeking, setIsSeeking] = useState(false);
+
   const router = useRouter();
 
   const loadTopic = async () => {
@@ -36,20 +64,17 @@ export default function TopicDetail() {
           sound.unloadAsync();
         }
       };
-    }, [id, sound])
+    }, [id])
   );
 
   const handleGenerateScript = async () => {
     if (!topic) return;
 
     if (topic.aiScript) {
-      Alert.alert(
+      customAlert(
         'Regenerate Script',
         'A script already exists. Do you want to overwrite it?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Overwrite', onPress: () => performGeneration() },
-        ]
+        () => performGeneration()
       );
     } else {
       performGeneration();
@@ -80,12 +105,12 @@ export default function TopicDetail() {
         await saveTopic(updatedTopic);
         setTopic(updatedTopic);
         setInstructions(''); // Clear instructions after success
-        Alert.alert('Success', 'AI Script generated successfully!');
+        customAlert('Success', 'AI Script generated successfully!');
       } else {
         throw new Error(data.error || 'Failed to generate script');
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      customAlert('Error', error.message);
     } finally {
       setIsGenerating(false);
     }
@@ -112,31 +137,63 @@ export default function TopicDetail() {
         throw new Error(data.error || 'Failed to generate audio');
       }
 
-      // Download the audio file
-      const fileUri = `${FileSystem.documentDirectory}${topic.id}.mp3`;
-      
-      // We need to use base64 for now as expo-file-system downloadAsync 
-      // is usually for GET. For POST with binary, we might need to handle it differently.
-      // But since our backend returns binary, we'll try to use a blob/base64 approach.
       const blob = await response.blob();
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64data = (reader.result as string).split(',')[1];
-        await FileSystem.writeAsStringAsync(fileUri, base64data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        
-        const updatedTopic = { ...topic, audioFileUri: fileUri };
+
+      if (Platform.OS === 'web') {
+        // Web: Use a temporary blob URL
+        const blobUrl = URL.createObjectURL(blob);
+        const updatedTopic = { ...topic, audioFileUri: blobUrl };
         await saveTopic(updatedTopic);
         setTopic(updatedTopic);
-        Alert.alert('Success', 'Audio generated and saved!');
-      };
-      reader.readAsDataURL(blob);
+        
+        if (sound) {
+          await sound.unloadAsync();
+          setSound(null);
+          setIsPlaying(false);
+        }
+        customAlert('Success', 'Audio generated! (Temporary URL for web)');
+      } else {
+        // Mobile: Save to local filesystem
+        const fileUri = `${FileSystem.documentDirectory}${topic.id}.mp3`;
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64data = (reader.result as string).split(',')[1];
+          await FileSystem.writeAsStringAsync(fileUri, base64data, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          
+          const updatedTopic = { ...topic, audioFileUri: fileUri };
+          await saveTopic(updatedTopic);
+          setTopic(updatedTopic);
+          
+          if (sound) {
+            await sound.unloadAsync();
+            setSound(null);
+            setIsPlaying(false);
+          }
+          customAlert('Success', 'Audio generated and saved!');
+        };
+        reader.readAsDataURL(blob);
+      }
 
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      customAlert('Error', error.message);
     } finally {
       setIsGeneratingAudio(false);
+    }
+  };
+
+  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    if (status.isLoaded) {
+      setPosition(status.positionMillis);
+      setDuration(status.durationMillis || 0);
+      setIsPlaying(status.isPlaying);
+      if (status.didJustFinish) {
+        setIsPlaying(false);
+        setPosition(0);
+      }
+    } else if (status.error) {
+      console.error(`Playback Error: ${status.error}`);
     }
   };
 
@@ -147,47 +204,45 @@ export default function TopicDetail() {
       if (sound) {
         if (isPlaying) {
           await sound.pauseAsync();
-          setIsPlaying(false);
         } else {
           await sound.playAsync();
-          setIsPlaying(true);
         }
       } else {
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: topic.audioFileUri },
-          { shouldPlay: true }
+          { shouldPlay: true },
+          onPlaybackStatusUpdate
         );
         setSound(newSound);
-        setIsPlaying(true);
-        
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setIsPlaying(false);
-          }
-        });
       }
     } catch (error: any) {
-      Alert.alert('Error playing sound', error.message);
+      customAlert('Error playing sound', error.message);
+    }
+  };
+
+  const formatTime = (millis: number) => {
+    const minutes = Math.floor(millis / 60000);
+    const seconds = ((millis % 60000) / 1000).toFixed(0);
+    return `${minutes}:${Number(seconds) < 10 ? '0' : ''}${seconds}`;
+  };
+
+  const handleSeek = async (value: number) => {
+    if (sound) {
+      await sound.setPositionAsync(value);
+      setPosition(value);
     }
   };
 
   const handleDelete = async () => {
-    Alert.alert(
+    customAlert(
       'Delete Topic',
       'Are you sure you want to delete this topic?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            if (typeof id === 'string') {
-              await deleteTopic(id);
-              router.back();
-            }
-          },
-        },
-      ]
+      async () => {
+        if (typeof id === 'string') {
+          await deleteTopic(id);
+          router.back();
+        }
+      }
     );
   };
 
@@ -219,11 +274,31 @@ export default function TopicDetail() {
       {topic.audioFileUri && (
         <View style={styles.audioSection}>
           <Text style={styles.label}>Audiobook ready!</Text>
-          <Button 
-            title={isPlaying ? "Pause Audio" : "Play Audio"} 
-            onPress={playSound} 
-            color="#4CAF50"
-          />
+          
+          <View style={styles.playerControls}>
+            <TouchableOpacity onPress={playSound} style={styles.playIconButton}>
+              <Text style={styles.playIcon}>{isPlaying ? "⏸" : "▶️"}</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.progressContainer}>
+              {Platform.OS === 'web' ? (
+                <input
+                  type="range"
+                  min="0"
+                  max={duration}
+                  value={position}
+                  onChange={(e) => handleSeek(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+              ) : (
+                <Text style={styles.notes}>Slider (Mobile Pending Library)</Text>
+              )}
+              <View style={styles.timeLabels}>
+                <Text style={styles.timeText}>{formatTime(position)}</Text>
+                <Text style={styles.timeText}>{formatTime(duration)}</Text>
+              </View>
+            </View>
+          </View>
         </View>
       )}
 

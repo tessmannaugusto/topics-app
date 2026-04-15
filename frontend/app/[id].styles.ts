@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
@@ -47,7 +47,45 @@ export const styles = StyleSheet.create({
   audioSection: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#e8f5e9',
-    borderRadius: 8,
+    backgroundColor: '#f0f4f8',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#d1d9e6',
+  },
+  playerControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  playIconButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  playIcon: {
+    fontSize: 24,
+    color: '#fff',
+  },
+  progressContainer: {
+    flex: 1,
+  },
+  timeLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 5,
+  },
+  timeText: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
 });
