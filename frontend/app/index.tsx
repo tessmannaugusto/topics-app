@@ -1,17 +1,18 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Button, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Button, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getTopics, Topic, saveTopic } from '../src/storage/topic-storage';
 import * as FileSystem from 'expo-file-system/legacy';
-import { Audio } from 'expo-av';
+import { useAudio } from '../src/context/AudioContext';
 import { API_URL } from '../src/config';
 import { styles } from './index.styles';
 
 export default function TopicList() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  
+  const { isPlaying, currentTopicId, playSound, pauseSound, stopSound } = useAudio();
+  
   const router = useRouter();
 
   const loadTopics = async () => {
@@ -22,12 +23,7 @@ export default function TopicList() {
   useFocusEffect(
     useCallback(() => {
       loadTopics();
-      return () => {
-        if (sound) {
-          sound.unloadAsync();
-        }
-      };
-    }, [sound])
+    }, [])
   );
 
   const handleGenerateAudio = async (topic: Topic) => {
@@ -55,22 +51,32 @@ export default function TopicList() {
         throw new Error(data.error || 'Failed to generate audio');
       }
 
-      const fileUri = `${FileSystem.documentDirectory}${topic.id}.mp3`;
       const blob = await response.blob();
-      const reader = new FileReader();
       
-      reader.onload = async () => {
-        const base64data = (reader.result as string).split(',')[1];
-        await FileSystem.writeAsStringAsync(fileUri, base64data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        
-        const updatedTopic = { ...topic, audioFileUri: fileUri };
+      if (Platform.OS === 'web') {
+        const blobUrl = URL.createObjectURL(blob);
+        const updatedTopic = { ...topic, audioFileUri: blobUrl };
         await saveTopic(updatedTopic);
-        loadTopics(); // Refresh list
+        loadTopics();
+        if (currentTopicId === topic.id) await stopSound();
         Alert.alert('Success', `Audio for "${topic.name}" is ready!`);
-      };
-      reader.readAsDataURL(blob);
+      } else {
+        const fileUri = `${FileSystem.documentDirectory}${topic.id}.mp3`;
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const base64data = (reader.result as string).split(',')[1];
+          await FileSystem.writeAsStringAsync(fileUri, base64data, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          
+          const updatedTopic = { ...topic, audioFileUri: fileUri };
+          await saveTopic(updatedTopic);
+          loadTopics();
+          if (currentTopicId === topic.id) await stopSound();
+          Alert.alert('Success', `Audio for "${topic.name}" is ready!`);
+        };
+        reader.readAsDataURL(blob);
+      }
 
     } catch (error: any) {
       Alert.alert('Error', error.message);
@@ -83,34 +89,13 @@ export default function TopicList() {
     }
   };
 
-  const playSound = async (topic: Topic) => {
+  const togglePlayback = async (topic: Topic) => {
     if (!topic.audioFileUri) return;
 
-    try {
-      if (playingId === topic.id && sound) {
-        await sound.pauseAsync();
-        setPlayingId(null);
-      } else {
-        if (sound) {
-          await sound.unloadAsync();
-        }
-
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: topic.audioFileUri },
-          { shouldPlay: true }
-        );
-        
-        setSound(newSound);
-        setPlayingId(topic.id);
-        
-        newSound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setPlayingId(null);
-          }
-        });
-      }
-    } catch (error: any) {
-      Alert.alert('Error playing sound', error.message);
+    if (currentTopicId === topic.id && isPlaying) {
+      await pauseSound();
+    } else {
+      await playSound(topic.id, topic.audioFileUri);
     }
   };
 
@@ -128,10 +113,10 @@ export default function TopicList() {
         {item.audioFileUri ? (
           <TouchableOpacity 
             style={[styles.audioButton, styles.playButton]} 
-            onPress={() => playSound(item)}
+            onPress={() => togglePlayback(item)}
           >
             <Text style={styles.buttonText}>
-              {playingId === item.id ? "Pause" : "Play"}
+              {currentTopicId === item.id && isPlaying ? "Pause" : "Play"}
             </Text>
           </TouchableOpacity>
         ) : item.aiScript ? (

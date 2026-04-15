@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { getTopicById, deleteTopic, saveTopic, Topic } from '../src/storage/topic-storage';
 import { API_URL } from '../src/config';
 import * as FileSystem from 'expo-file-system/legacy';
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import { useAudio } from '../src/context/AudioContext';
 import { styles } from './[id].styles';
 
 // Helper for compatible alerts
@@ -35,13 +35,17 @@ export default function TopicDetail() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [instructions, setInstructions] = useState('');
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   
-  // Audio player state
-  const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isSeeking, setIsSeeking] = useState(false);
+  const { 
+    isPlaying, 
+    currentTopicId, 
+    position, 
+    duration, 
+    playSound, 
+    pauseSound, 
+    stopSound,
+    seekSound 
+  } = useAudio();
 
   const router = useRouter();
 
@@ -59,11 +63,6 @@ export default function TopicDetail() {
   useFocusEffect(
     useCallback(() => {
       loadTopic();
-      return () => {
-        if (sound) {
-          sound.unloadAsync();
-        }
-      };
     }, [id])
   );
 
@@ -140,20 +139,16 @@ export default function TopicDetail() {
       const blob = await response.blob();
 
       if (Platform.OS === 'web') {
-        // Web: Use a temporary blob URL
         const blobUrl = URL.createObjectURL(blob);
         const updatedTopic = { ...topic, audioFileUri: blobUrl };
         await saveTopic(updatedTopic);
         setTopic(updatedTopic);
         
-        if (sound) {
-          await sound.unloadAsync();
-          setSound(null);
-          setIsPlaying(false);
+        if (currentTopicId === topic.id) {
+          await stopSound();
         }
         customAlert('Success', 'Audio generated! (Temporary URL for web)');
       } else {
-        // Mobile: Save to local filesystem
         const fileUri = `${FileSystem.documentDirectory}${topic.id}.mp3`;
         const reader = new FileReader();
         reader.onload = async () => {
@@ -166,10 +161,8 @@ export default function TopicDetail() {
           await saveTopic(updatedTopic);
           setTopic(updatedTopic);
           
-          if (sound) {
-            await sound.unloadAsync();
-            setSound(null);
-            setIsPlaying(false);
+          if (currentTopicId === topic.id) {
+            await stopSound();
           }
           customAlert('Success', 'Audio generated and saved!');
         };
@@ -183,41 +176,44 @@ export default function TopicDetail() {
     }
   };
 
-  const onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
-      setPosition(status.positionMillis);
-      setDuration(status.durationMillis || 0);
-      setIsPlaying(status.isPlaying);
-      if (status.didJustFinish) {
-        setIsPlaying(false);
-        setPosition(0);
-      }
-    } else if (status.error) {
-      console.error(`Playback Error: ${status.error}`);
+  const handleTogglePlay = async () => {
+    if (!topic?.audioFileUri) return;
+
+    if (currentTopicId === topic.id && isPlaying) {
+      await pauseSound();
+    } else {
+      await playSound(topic.id, topic.audioFileUri);
     }
   };
 
-  const playSound = async () => {
+  const handleDeleteAudio = async () => {
     if (!topic?.audioFileUri) return;
 
-    try {
-      if (sound) {
-        if (isPlaying) {
-          await sound.pauseAsync();
-        } else {
-          await sound.playAsync();
+    customAlert(
+      'Delete Audio',
+      'Are you sure you want to delete the generated audio for this topic?',
+      async () => {
+        try {
+          if (currentTopicId === topic.id) {
+            await stopSound();
+          }
+
+          if (Platform.OS !== 'web' && topic.audioFileUri) {
+            const fileInfo = await FileSystem.getInfoAsync(topic.audioFileUri);
+            if (fileInfo.exists) {
+              await FileSystem.deleteAsync(topic.audioFileUri);
+            }
+          }
+
+          const updatedTopic = { ...topic, audioFileUri: undefined };
+          await saveTopic(updatedTopic);
+          setTopic(updatedTopic);
+          customAlert('Success', 'Audio deleted successfully.');
+        } catch (error: any) {
+          customAlert('Error', 'Failed to delete audio: ' + error.message);
         }
-      } else {
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: topic.audioFileUri },
-          { shouldPlay: true },
-          onPlaybackStatusUpdate
-        );
-        setSound(newSound);
       }
-    } catch (error: any) {
-      customAlert('Error playing sound', error.message);
-    }
+    );
   };
 
   const formatTime = (millis: number) => {
@@ -226,19 +222,15 @@ export default function TopicDetail() {
     return `${minutes}:${Number(seconds) < 10 ? '0' : ''}${seconds}`;
   };
 
-  const handleSeek = async (value: number) => {
-    if (sound) {
-      await sound.setPositionAsync(value);
-      setPosition(value);
-    }
-  };
-
   const handleDelete = async () => {
     customAlert(
       'Delete Topic',
       'Are you sure you want to delete this topic?',
       async () => {
         if (typeof id === 'string') {
+          if (currentTopicId === id) {
+            await stopSound();
+          }
           await deleteTopic(id);
           router.back();
         }
@@ -247,6 +239,8 @@ export default function TopicDetail() {
   };
 
   if (!topic) return null;
+
+  const isCurrentPlaying = currentTopicId === topic.id;
 
   return (
     <ScrollView style={styles.container}>
@@ -273,11 +267,18 @@ export default function TopicDetail() {
 
       {topic.audioFileUri && (
         <View style={styles.audioSection}>
-          <Text style={styles.label}>Audiobook ready!</Text>
+          <View style={styles.audioHeader}>
+            <Text style={styles.label}>Audiobook ready!</Text>
+            <TouchableOpacity onPress={handleDeleteAudio} style={styles.deleteAudioButton}>
+              <Text style={styles.deleteAudioText}>Delete Audio</Text>
+            </TouchableOpacity>
+          </View>
           
           <View style={styles.playerControls}>
-            <TouchableOpacity onPress={playSound} style={styles.playIconButton}>
-              <Text style={styles.playIcon}>{isPlaying ? "⏸" : "▶️"}</Text>
+            <TouchableOpacity onPress={handleTogglePlay} style={styles.playIconButton}>
+              <Text style={styles.playIcon}>
+                {isCurrentPlaying && isPlaying ? "⏸" : "▶️"}
+              </Text>
             </TouchableOpacity>
             
             <View style={styles.progressContainer}>
@@ -285,17 +286,17 @@ export default function TopicDetail() {
                 <input
                   type="range"
                   min="0"
-                  max={duration}
-                  value={position}
-                  onChange={(e) => handleSeek(Number(e.target.value))}
+                  max={isCurrentPlaying ? duration : 0}
+                  value={isCurrentPlaying ? position : 0}
+                  onChange={(e) => isCurrentPlaying && seekSound(Number(e.target.value))}
                   style={{ width: '100%' }}
                 />
               ) : (
                 <Text style={styles.notes}>Slider (Mobile Pending Library)</Text>
               )}
               <View style={styles.timeLabels}>
-                <Text style={styles.timeText}>{formatTime(position)}</Text>
-                <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                <Text style={styles.timeText}>{isCurrentPlaying ? formatTime(position) : "0:00"}</Text>
+                <Text style={styles.timeText}>{isCurrentPlaying ? formatTime(duration) : "0:00"}</Text>
               </View>
             </View>
           </View>

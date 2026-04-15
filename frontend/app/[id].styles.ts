@@ -52,6 +52,24 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d1d9e6',
   },
+  audioHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  deleteAudioButton: {
+    padding: 6,
+    backgroundColor: '#ffebee',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#ffcdd2',
+  },
+  deleteAudioText: {
+    color: '#d32f2f',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   playerControls: {
     flexDirection: 'row',
     alignItems: 'center',
