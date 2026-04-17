@@ -5,6 +5,7 @@ import { getTopicById, deleteTopic, saveTopic, Topic } from '../src/storage/topi
 import { API_URL } from '../src/config';
 import * as FileSystem from 'expo-file-system/legacy';
 import { useAudio } from '../src/context/AudioContext';
+import { theme } from '../src/styles/theme';
 import { styles } from './[id].styles';
 
 // Helper for compatible alerts
@@ -243,41 +244,48 @@ export default function TopicDetail() {
   const isCurrentPlaying = currentTopicId === topic.id;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.name}>{topic.name}</Text>
-      <Text style={styles.date}>Created: {new Date(topic.dateCreated).toLocaleString()}</Text>
-      <Text style={styles.label}>Notes:</Text>
-      <Text style={styles.notes}>{topic.notes || 'No notes provided.'}</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <View style={styles.header}>
+        <Text style={styles.name}>{topic.name}</Text>
+        <Text style={styles.date}>{new Date(topic.dateCreated).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.label}>Notes</Text>
+        <Text style={styles.notes}>{topic.notes || 'No notes provided.'}</Text>
+      </View>
       
       {topic.aiScript && (
-        <>
-          <Text style={styles.label}>AI Script:</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>AI Script</Text>
           <Text style={styles.notes}>{topic.aiScript}</Text>
           
-          <Text style={styles.label}>Regeneration Instructions (Optional):</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Example: Make it 30% smaller, less fillers..."
-            value={instructions}
-            onChangeText={setInstructions}
-            multiline
-          />
-        </>
+          <View style={{ marginTop: theme.spacing.xl }}>
+            <Text style={styles.label}>Refine script</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. Make it more professional..."
+              value={instructions}
+              onChangeText={setInstructions}
+              multiline
+            />
+          </View>
+        </View>
       )}
 
       {topic.audioFileUri && (
         <View style={styles.audioSection}>
           <View style={styles.audioHeader}>
-            <Text style={styles.label}>Audiobook ready!</Text>
+            <Text style={styles.audioTitle}>Audiobook</Text>
             <TouchableOpacity onPress={handleDeleteAudio} style={styles.deleteAudioButton}>
-              <Text style={styles.deleteAudioText}>Delete Audio</Text>
+              <Text style={styles.deleteAudioText}>DELETE</Text>
             </TouchableOpacity>
           </View>
           
           <View style={styles.playerControls}>
-            <TouchableOpacity onPress={handleTogglePlay} style={styles.playIconButton}>
-              <Text style={styles.playIcon}>
-                {isCurrentPlaying && isPlaying ? "⏸" : "▶️"}
+            <TouchableOpacity onPress={handleTogglePlay} style={styles.playIconButton} activeOpacity={0.8}>
+              <Text style={isCurrentPlaying && isPlaying ? styles.pauseIcon : styles.playIcon}>
+                {isCurrentPlaying && isPlaying ? "‖" : "▶"}
               </Text>
             </TouchableOpacity>
             
@@ -289,10 +297,12 @@ export default function TopicDetail() {
                   max={isCurrentPlaying ? duration : 0}
                   value={isCurrentPlaying ? position : 0}
                   onChange={(e) => isCurrentPlaying && seekSound(Number(e.target.value))}
-                  style={{ width: '100%' }}
+                  style={{ width: '100%', accentColor: theme.colors.primary }}
                 />
               ) : (
-                <Text style={styles.notes}>Slider (Mobile Pending Library)</Text>
+                <View style={{ height: 2, backgroundColor: theme.colors.border, width: '100%' }}>
+                   <View style={{ height: 2, backgroundColor: theme.colors.primary, width: isCurrentPlaying ? `${(position/duration)*100}%` : '0%' }} />
+                </View>
               )}
               <View style={styles.timeLabels}>
                 <Text style={styles.timeText}>{isCurrentPlaying ? formatTime(position) : "0:00"}</Text>
@@ -305,35 +315,42 @@ export default function TopicDetail() {
 
       <View style={styles.actions}>
         {isGenerating ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="small" color={theme.colors.primary} />
         ) : (
-          <Button 
-            title={topic.aiScript ? "Regenerate AI Script" : "Generate AI Script"} 
+          <TouchableOpacity 
+            style={styles.primaryButton}
             onPress={handleGenerateScript}
             disabled={!topic.notes || topic.notes.trim().length === 0}
-          />
+          >
+            <Text style={styles.primaryButtonText}>
+              {topic.aiScript ? "REGENERATE SCRIPT" : "GENERATE SCRIPT"}
+            </Text>
+          </TouchableOpacity>
         )}
         
-        <View style={styles.spacer} />
-        
-        {topic.aiScript && (
-          <>
-            {isGeneratingAudio ? (
-              <ActivityIndicator size="large" color="#4CAF50" />
-            ) : (
-              <Button 
-                title={topic.audioFileUri ? "Regenerate Audio" : "Generate Audio"} 
-                onPress={handleGenerateAudio}
-                color="#4CAF50"
-              />
-            )}
-            <View style={styles.spacer} />
-          </>
+        {topic.aiScript && !topic.audioFileUri && (
+          isGeneratingAudio ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : (
+            <TouchableOpacity style={styles.primaryButton} onPress={handleGenerateAudio}>
+              <Text style={styles.primaryButtonText}>GENERATE AUDIO</Text>
+            </TouchableOpacity>
+          )
+        )}
+
+        {topic.audioFileUri && !isGeneratingAudio && (
+           <TouchableOpacity style={styles.secondaryButton} onPress={handleGenerateAudio}>
+              <Text style={styles.secondaryButtonText}>REGENERATE AUDIO</Text>
+           </TouchableOpacity>
         )}
         
-        <Button title="Edit Topic" onPress={() => router.push(`/edit/${topic.id}`)} />
-        <View style={styles.spacer} />
-        <Button title="Delete Topic" color="red" onPress={handleDelete} />
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push(`/edit/${topic.id}`)}>
+          <Text style={styles.secondaryButtonText}>EDIT TOPIC</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.dangerButton} onPress={handleDelete}>
+          <Text style={styles.dangerButtonText}>DELETE TOPIC</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

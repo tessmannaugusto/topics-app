@@ -103,6 +103,7 @@ export default function TopicList() {
     <View style={styles.topicItemContainer}>
       <TouchableOpacity
         style={styles.topicInfo}
+        activeOpacity={0.7}
         onPress={() => router.push(`/${item.id}`)}
       >
         <Text style={styles.topicName}>{item.name}</Text>
@@ -113,21 +114,23 @@ export default function TopicList() {
         {item.audioFileUri ? (
           <TouchableOpacity 
             style={[styles.audioButton, styles.playButton]} 
+            activeOpacity={0.8}
             onPress={() => togglePlayback(item)}
           >
             <Text style={styles.buttonText}>
-              {currentTopicId === item.id && isPlaying ? "Pause" : "Play"}
+              {currentTopicId === item.id && isPlaying ? "PAUSE" : "PLAY"}
             </Text>
           </TouchableOpacity>
         ) : item.aiScript ? (
           generatingIds.has(item.id) ? (
-            <ActivityIndicator size="small" color="#4CAF50" />
+            <ActivityIndicator size="small" color="#000" />
           ) : (
             <TouchableOpacity 
               style={[styles.audioButton, styles.generateButton]} 
+              activeOpacity={0.8}
               onPress={() => handleGenerateAudio(item)}
             >
-              <Text style={styles.buttonText}>Audio</Text>
+              <Text style={styles.generateButtonText}>GENERATE</Text>
             </TouchableOpacity>
           )
         ) : null}
@@ -141,11 +144,18 @@ export default function TopicList() {
         data={topics}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={<Text style={styles.emptyText}>No topics yet.</Text>}
       />
-      <View style={styles.buttonContainer}>
-        <Button title="Create Topic" onPress={() => router.push('/create')} />
-      </View>
+      
+      <TouchableOpacity 
+        style={styles.fab}
+        activeOpacity={0.9}
+        onPress={() => router.push('/create')}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
