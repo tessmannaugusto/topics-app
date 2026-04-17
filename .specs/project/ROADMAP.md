@@ -42,17 +42,21 @@
 ## Milestone 2: Interactive Learning
 
 **Goal:** Add AI-driven questions and answers to the learning loop.
+**Status:** In Progress (Specified)
 
 ### Features
 
-**AI Question Generator** - PLANNED
+**AI Question Generator** - SPECIFIED
 - Generate relevant questions based on topic content.
+- [Specification](../features/ai-question-generator/spec.md)
 
-**Interactive Responses** - PLANNED
+**Interactive Responses** - SPECIFIED
 - Accept text or audio answers from the user.
+- [Specification](../features/interactive-responses/spec.md)
 
-**AI Evaluation & Feedback** - PLANNED
+**AI Evaluation & Feedback** - SPECIFIED
 - Correct user answers and provide feedback on accuracy.
+- [Specification](../features/ai-evaluation-feedback/spec.md)
 
 ---
 
