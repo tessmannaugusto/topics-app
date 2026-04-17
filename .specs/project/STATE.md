@@ -12,6 +12,7 @@
 | 2026-04-15 | Global Audio Context | Implemented `AudioContext` to manage single-source playback across navigation. |
 | 2026-04-15 | 0.0.0.0 Backend Host | Set backend to listen on all interfaces to fix connection refused errors. |
 | 2026-04-15 | Web Blob URLs | Use `URL.createObjectURL` for temporary audio playback on Web since `FileSystem` is native-only. |
+| 2026-04-17 | File Import for Notes | Use `expo-document-picker` to import .txt and .md files into topic notes. |
 
 ## Blockers
 
@@ -23,6 +24,7 @@
 - `expo-file-system` is not available on Web; use Blobs and `URL.createObjectURL` for browser testing.
 - For background audio on mobile, `Audio.setAudioModeAsync` must be configured with `staysActiveInBackground: true`.
 - Native `Alert.alert` does not work on Web; use a helper that falls back to `window.confirm`/`alert`.
+- `expo-document-picker` works on Web by returning a local blob URI that can be fetched to read text content.
 
 ## Todos
 
@@ -36,8 +38,10 @@
 - [x] Research Google TTS React Native integration options. (Done: Decided on Backend Proxy).
 - [x] Implement advanced Audio Player with seeking and global state.
 - [x] Implement "Delete Audio" functionality.
+- [x] Implement File Import (.txt/.md) for topic notes.
+- [x] Implement Voice-to-Note (STT) for topic notes.
+- [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
 ## Deferred Ideas
 
-- File imports (.txt/.md) - Deferred to Milestone 3.
 - AI Question/Answer loop - Deferred to Milestone 2.

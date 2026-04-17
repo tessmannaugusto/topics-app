@@ -14,3 +14,10 @@ export const generateAudioSchema = z.object({
     script: z.string().min(1, "Script cannot be empty"),
   }),
 });
+
+export const transcribeSchema = z.object({
+  body: z.object({
+    audioContent: z.string().min(1, "Audio content cannot be empty"),
+    platform: z.enum(['android', 'ios', 'web']).optional(),
+  }),
+});

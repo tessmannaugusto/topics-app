@@ -25,6 +25,41 @@ export const formStyles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.sm,
   },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  importButton: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    backgroundColor: theme.colors.primary + '20', // 20% opacity primary
+    borderRadius: theme.borderRadius.sm,
+  },
+  importButtonText: {
+    ...theme.typography.label,
+    color: theme.colors.primary,
+    fontSize: 10,
+  },
+  micButton: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    backgroundColor: theme.colors.primary + '20',
+    borderRadius: theme.borderRadius.sm,
+    marginLeft: theme.spacing.sm,
+  },
+  micButtonRecording: {
+    backgroundColor: theme.colors.error,
+  },
+  micButtonText: {
+    ...theme.typography.label,
+    color: theme.colors.primary,
+    fontSize: 10,
+  },
+  micButtonTextRecording: {
+    color: theme.colors.background,
+  },
   input: {
     ...theme.typography.body,
     paddingVertical: theme.spacing.md,

@@ -31,6 +31,12 @@
 - Global playback management (Persistent audio across navigation).
 - Background playback support.
 
+**File Imports** - DONE
+- Support importing .txt and .md files to populate topic notes.
+
+**Voice-to-Note** - DONE
+- Capture audio input and transcribe to notes using Google STT.
+
 ---
 
 ## Milestone 2: Interactive Learning
@@ -56,8 +62,8 @@
 
 ### Features
 
-**File Imports** - PLANNED
-- Support importing .txt and .md files.
+**Note Reorganization** - PLANNED
+- Use AI to clean up, de-duplicate, and structure raw notes.
 
 **AI Topic Extraction** - PLANNED
 - Automatically extract main points from messy or long notes.
@@ -69,3 +75,4 @@
 - Multi-platform support (iOS/Web).
 - Offline mode for audio playback.
 - Progress tracking and SRS (Spaced Repetition System) integration.
+
