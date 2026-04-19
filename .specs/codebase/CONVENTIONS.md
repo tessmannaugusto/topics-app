@@ -20,3 +20,7 @@
 ## Workflow
 - Atomic commits with descriptive messages.
 - Verify changes with tests before completing tasks.
+
+## Technical Integrity
+- **Build Verification:** AFTER every change to the code, ALL changed files MUST be built/type-checked correctly (e.g., via `npx tsc --noEmit` in the respective directory) to ensure no new compilation or type errors were introduced.
+- **Dependency Check:** Any new dependencies must be verified for compatibility with the existing project structure (e.g., Expo compatibility for frontend).

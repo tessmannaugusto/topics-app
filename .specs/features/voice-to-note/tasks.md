@@ -33,7 +33,14 @@
   - Link to transcription logic.
   - **Done when**: User can dictate notes in Edit screen.
 
+- [x] T7: Implement Web Speech API transcription in `voice-recorder.ts` <!-- id: T7 -->
+  - Detect if Web Speech API is available.
+  - Implement real-time transcription for web.
+  - Fallback to current audio recording if unavailable or on native.
+  - **Done when**: Web browser uses Web Speech API for transcription.
+
 ### Verification
 - [ ] V1: Verify Android transcription (AMR_WB) <!-- id: V1 -->
 - [ ] V2: Verify iOS transcription (LINEAR16) <!-- id: V2 -->
 - [ ] V3: Verify text appending behavior <!-- id: V3 -->
+- [ ] V4: Verify Web Speech API transcription in browser <!-- id: V4 -->

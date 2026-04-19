@@ -6,8 +6,9 @@ A text-based script is a good start, but the primary goal of this app is to prov
 
 ## Goals
 
-- [ ] Convert AI-generated scripts into MP3 audio files using Google Cloud Text-to-Speech.
-- [ ] Support high-quality, natural-sounding voices (e.g., WaveNet or Journey).
+- [ ] Convert AI-generated scripts into high-quality audio files using Google Cloud Text-to-Speech (Cloud).
+- [ ] Support on-device Text-to-Speech using `expo-speech` (or `react-native-tts`) as a cost-effective alternative for mobile apps.
+- [ ] Support high-quality, natural-sounding voices (e.g., WaveNet or Journey for Cloud).
 - [ ] Store the generated audio files and associate them with the corresponding topics.
 - [ ] Allow the user to trigger audio generation from the topic detail view.
 
@@ -29,9 +30,14 @@ A text-based script is a good start, but the primary goal of this app is to prov
 
 **Acceptance Criteria**:
 
-1. WHEN the user requests audio generation for a script THEN the system SHALL send the script to Google Cloud TTS.
-2. THE system SHALL receive an MP3 audio file (or binary stream) from Google Cloud TTS.
-3. THE system SHALL store the audio file (locally or on a server, TBD in Design).
+1. WHEN the user requests audio generation for a script THEN the system SHALL allow choosing between Google Cloud TTS (Cloud) or On-Device TTS.
+2. IF using Google Cloud TTS THEN:
+    - THE system SHALL send the script to Google Cloud TTS.
+    - THE system SHALL receive an MP3 audio file.
+    - THE system SHALL store the audio file.
+3. IF using On-Device TTS THEN:
+    - THE system SHALL use the device's native TTS engine.
+    - THE system SHALL read the script in real-time or generate a local file if supported.
 4. THE system SHALL update the topic's `audioFileUri` field with the path/URL to the audio file.
 5. THE user SHALL see a play button (or audio status) once the audio is generated.
 
@@ -53,6 +59,7 @@ A text-based script is a good start, but the primary goal of this app is to prov
 | AUDIO-02 | P1: Audio generation trigger in UI | Specify | Pending |
 | AUDIO-03 | P1: Storage of audio files | Specify | Pending |
 | AUDIO-04 | P1: Playback status/indicator | Specify | Pending |
+| AUDIO-05 | P1: Local on-device TTS support | Specify | Verified |
 
 **Status values**: Pending → In Design → In Tasks → Implementing → Verified
 

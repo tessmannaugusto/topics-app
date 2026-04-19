@@ -13,6 +13,7 @@ export default function EditTopic() {
   const [notes, setNotes] = useState('');
   const [topic, setTopic] = useState<Topic | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -56,28 +57,35 @@ export default function EditTopic() {
   const handleVoiceToggle = async () => {
     if (isRecording) {
       setIsRecording(false);
-      const audioBase64 = await stopRecording();
-      if (audioBase64) {
-        try {
-          const response = await fetch(`${API_URL}/transcribe`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              audioContent: audioBase64,
-              platform: Platform.OS,
-            }),
-          });
-          const data = await response.json();
-          if (data.transcript) {
-            setNotes((prev) => (prev ? `${prev}\n\n${data.transcript}` : data.transcript));
+      const result = await stopRecording();
+      setInterimTranscript('');
+      if (result) {
+        if (result.transcript) {
+          setNotes((prev) => (prev ? `${prev}\n\n${result.transcript}` : result.transcript || ''));
+        } else if (result.audioBase64) {
+          try {
+            const response = await fetch(`${API_URL}/transcribe`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                audioContent: result.audioBase64,
+                platform: Platform.OS,
+              }),
+            });
+            const data = await response.json();
+            if (data.transcript) {
+              setNotes((prev) => (prev ? `${prev}\n\n${data.transcript}` : data.transcript));
+            }
+          } catch (error) {
+            console.error('Transcription error:', error);
+            Alert.alert('Error', 'Failed to transcribe audio.');
           }
-        } catch (error) {
-          console.error('Transcription error:', error);
-          Alert.alert('Error', 'Failed to transcribe audio.');
         }
       }
     } else {
-      const started = await startRecording();
+      const started = await startRecording((text) => {
+        setInterimTranscript(text);
+      });
       if (started) {
         setIsRecording(true);
       } else {
@@ -134,11 +142,12 @@ export default function EditTopic() {
           </View>
           <TextInput
             style={styles.textArea}
-            value={notes}
+            value={isRecording ? notes + (interimTranscript ? `\n\n[Recording...]\n${interimTranscript}` : '\n\n[Recording...]') : notes}
             onChangeText={setNotes}
             placeholder="Paste your notes or ideas here..."
             placeholderTextColor="#CCC"
             multiline
+            editable={!isRecording}
           />
         </View>
       </ScrollView>

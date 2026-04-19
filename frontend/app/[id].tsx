@@ -39,13 +39,16 @@ export default function TopicDetail() {
   
   const { 
     isPlaying, 
+    isSpeaking,
     currentTopicId, 
     position, 
     duration, 
     playSound, 
     pauseSound, 
     stopSound,
-    seekSound 
+    seekSound,
+    speakLocal,
+    stopLocal
   } = useAudio();
 
   const router = useRouter();
@@ -174,6 +177,16 @@ export default function TopicDetail() {
       customAlert('Error', error.message);
     } finally {
       setIsGeneratingAudio(false);
+    }
+  };
+
+  const handleSpeakLocal = async () => {
+    if (!topic || !topic.aiScript) return;
+    
+    if (currentTopicId === topic.id && isSpeaking) {
+      await stopLocal();
+    } else {
+      await speakLocal(topic.id, topic.aiScript);
     }
   };
 
@@ -332,9 +345,16 @@ export default function TopicDetail() {
           isGeneratingAudio ? (
             <ActivityIndicator size="small" color={theme.colors.primary} />
           ) : (
-            <TouchableOpacity style={styles.primaryButton} onPress={handleGenerateAudio}>
-              <Text style={styles.primaryButtonText}>GENERATE AUDIO</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity style={styles.primaryButton} onPress={handleGenerateAudio}>
+                <Text style={styles.primaryButtonText}>GENERATE AUDIO FILE</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.secondaryButton} onPress={handleSpeakLocal}>
+                <Text style={styles.secondaryButtonText}>
+                  {currentTopicId === topic.id && isSpeaking ? "STOP AUDIO" : "PLAY AUDIO"}
+                </Text>
+              </TouchableOpacity>
+            </>
           )
         )}
 
