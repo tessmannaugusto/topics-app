@@ -41,7 +41,8 @@
 - [x] Implement File Import (.txt/.md) for topic notes.
 - [x] Implement Voice-to-Note (STT) for topic notes.
 - [x] Implement Web Frontend Support (Responsive + Persistence).
-- [ ] Implement Topic Detail Tabs refactor.
+- [x] Implement Topic Detail Tabs refactor.
+- [x] Implement Inline Notes Editing (Replace Edit Page).
 - [ ] Implement Cloud Sync & Auth (v1).
 - [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
