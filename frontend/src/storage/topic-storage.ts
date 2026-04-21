@@ -6,6 +6,11 @@ export interface Topic {
   notes: string;
   dateCreated: string;
   aiScript?: string;
+  /**
+   * Platform-specific audio reference:
+   * - Mobile: file://... (native file system path)
+   * - Web: idb://... (IndexedDB marker)
+   */
   audioFileUri?: string;
 }
 

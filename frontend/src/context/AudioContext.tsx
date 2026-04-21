@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
+import { audioPersistence } from '../storage/audio-persistence';
 
 interface AudioContextType {
   isPlaying: boolean;
@@ -9,7 +10,7 @@ interface AudioContextType {
   currentTopicId: string | null;
   position: number;
   duration: number;
-  playSound: (topicId: string, uri: string) => Promise<void>;
+  playSound: (topicId: string, storedUri: string) => Promise<void>;
   pauseSound: () => Promise<void>;
   stopSound: () => Promise<void>;
   seekSound: (millis: number) => Promise<void>;
@@ -60,7 +61,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const playSound = async (topicId: string, uri: string) => {
+  const playSound = async (topicId: string, storedUri: string) => {
     try {
       if (isSpeaking) {
         await stopLocal();
@@ -78,8 +79,15 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
         await sound.unloadAsync();
       }
 
+      // Resolve the actual playable URI
+      const playableUri = await audioPersistence.getAudioUri(topicId, storedUri);
+      if (!playableUri) {
+        console.error('Audio file not found');
+        return;
+      }
+
       const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri },
+        { uri: playableUri },
         { shouldPlay: true },
         onPlaybackStatusUpdate
       );

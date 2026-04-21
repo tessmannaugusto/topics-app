@@ -74,6 +74,48 @@
 
 ---
 
+## Milestone 4: Multi-Platform (Web)
+
+**Goal:** Enable the "Topics" app to run in any modern web browser with a responsive desktop experience and full feature parity.
+**Status:** Planned (Specified)
+
+### Features
+
+**Unified Web Support** - SPECIFIED
+- Enable Expo web bundling.
+- [Specification](../features/web-frontend/spec.md)
+
+**Responsive Desktop UI** - SPECIFIED
+- Two-pane layout for larger screens.
+- Desktop-optimized navigation.
+
+**Web-Specific Persistence** - SPECIFIED
+- Save audio files to IndexedDB to survive page refreshes.
+
+---
+
+## Milestone 5: Cloud Sync & Auth
+
+**Goal:** Enable user accounts and cross-device data synchronization.
+**Status:** Planned (Specified)
+
+### Features
+
+**Authentication (v1)** - SPECIFIED
+- Email/Password Signup and Login.
+- Secure token storage.
+- [Specification](../features/cloud-sync-auth/spec.md)
+
+**Offline-First Sync** - SPECIFIED
+- Automatic background synchronization between local and remote DB.
+- Conflict resolution (LWW).
+
+**Cloud Audio Storage** - SPECIFIED
+- Store generated MP3s in GCS.
+- Access audio from any device without re-generation.
+
+---
+
 ## Future Considerations
 
 - Multi-platform support (iOS/Web).

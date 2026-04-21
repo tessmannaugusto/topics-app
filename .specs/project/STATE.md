@@ -40,6 +40,15 @@
 - [x] Implement "Delete Audio" functionality.
 - [x] Implement File Import (.txt/.md) for topic notes.
 - [x] Implement Voice-to-Note (STT) for topic notes.
+- [x] Implement Web Frontend Support (Responsive + Persistence).
+- [ ] Implement Topic Detail Tabs refactor.
+- [ ] Implement Cloud Sync & Auth (v1).
+- [ ] Implement Note Reorganization (AI cleanup/restructuring).
+
+## Deferred Ideas
+
+- AI Question/Answer loop - Deferred to Milestone 2.
+c notes.
 - [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
 ## Deferred Ideas
