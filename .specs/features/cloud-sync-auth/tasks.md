@@ -2,9 +2,9 @@
 
 ## [PHASE-1] Backend Foundation
 
-- [x] [TASK-101] Initialize Prisma
-  - Description: Install Prisma, create schema, and perform initial migration.
-  - Done when: `npx prisma db pull` (if existing) or `npx prisma migrate dev` works.
+- [x] [TASK-101] Initialize Prisma (Migrated to Neon DB)
+  - Description: Install Prisma, create schema (PostgreSQL), and prepare for migration.
+  - Done when: `npx prisma generate` works and provider is `postgresql`.
 
 - [x] [TASK-102] Implement JWT Auth Endpoints
   - Description: Add Signup and Login endpoints with `bcrypt` and `jsonwebtoken`.
@@ -26,8 +26,8 @@
 
 ## [PHASE-3] Data Synchronization
 
-- [ ] [TASK-301] Update Models for Syncing
-  - Description: Add `userId`, `updatedAt`, and `isDeleted` to topics on both Frontend and Backend.
+- [x] [TASK-301] Update Models for Syncing
+  - Description: Add `Topic` and `Question` models to Prisma schema to support cloud sync.
   - Done when: DB schema reflects changes and types match.
 
 - [ ] [TASK-302] Implement Sync Endpoints (Pull/Push)

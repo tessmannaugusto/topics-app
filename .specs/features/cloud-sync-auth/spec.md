@@ -28,7 +28,7 @@ Enable users to create accounts and sync their topics, notes, and progress acros
 
 - Framework: React Native (Expo) + Web (Unified).
 - Backend: Express (Node.js) with Prisma ORM.
-- Database: PostgreSQL (External).
+- Database: PostgreSQL (Neon DB).
 - Storage: Google Cloud Storage (GCS).
 
 ## Success Criteria
