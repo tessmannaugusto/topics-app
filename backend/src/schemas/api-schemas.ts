@@ -21,3 +21,12 @@ export const transcribeSchema = z.object({
     platform: z.enum(['android', 'ios', 'web']).optional(),
   }),
 });
+
+export const generateQuestionsSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, "Topic name cannot be empty"),
+    notes: z.string().min(1, "Notes cannot be empty"),
+    script: z.string().optional(),
+    count: z.number().min(1).max(10).optional().default(3),
+  }),
+});

@@ -2,18 +2,22 @@ import { Router } from 'express';
 import { generateScript } from './api/generate-script';
 import { generateAudio } from './api/generate-audio';
 import { transcribe } from './api/transcribe';
+import { generateQuestions } from './api/generate-questions';
+import { signup, login } from './api/auth';
 import { validate } from './middleware/validate';
-import { generateScriptSchema, generateAudioSchema, transcribeSchema } from './schemas/api-schemas';
+import { authenticate } from './middleware/auth';
+import { generateScriptSchema, generateAudioSchema, transcribeSchema, generateQuestionsSchema } from './schemas/api-schemas';
 
 const router = Router();
 
-// Script generation endpoint
-router.post('/generate-script', validate(generateScriptSchema), generateScript);
+// Auth endpoints
+router.post('/signup', signup);
+router.post('/login', login);
 
-// Audio generation endpoint
-router.post('/generate-audio', validate(generateAudioSchema), generateAudio);
-
-// Transcription endpoint
-router.post('/transcribe', validate(transcribeSchema), transcribe);
+// Protected API Routes
+router.post('/generate-script', authenticate, validate(generateScriptSchema), generateScript);
+router.post('/generate-audio', authenticate, validate(generateAudioSchema), generateAudio);
+router.post('/transcribe', authenticate, validate(transcribeSchema), transcribe);
+router.post('/generate-questions', authenticate, validate(generateQuestionsSchema), generateQuestions);
 
 export default router;

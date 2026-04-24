@@ -2,21 +2,21 @@
 
 ## [PHASE-1] Backend Foundation
 
-- [ ] [TASK-101] Initialize Prisma
+- [x] [TASK-101] Initialize Prisma
   - Description: Install Prisma, create schema, and perform initial migration.
   - Done when: `npx prisma db pull` (if existing) or `npx prisma migrate dev` works.
 
-- [ ] [TASK-102] Implement JWT Auth Endpoints
+- [x] [TASK-102] Implement JWT Auth Endpoints
   - Description: Add Signup and Login endpoints with `bcrypt` and `jsonwebtoken`.
   - Done when: Test via `curl` or Postman.
 
-- [ ] [TASK-103] Add Authentication Middleware
+- [x] [TASK-103] Add Authentication Middleware
   - Description: Secure sensitive routes using a JWT verification middleware.
   - Done when: Backend rejects requests without a valid `Bearer` token.
 
 ## [PHASE-2] Frontend Auth Integration
 
-- [ ] [TASK-201] Implement `AuthContext`
+- [x] [TASK-201] Implement `AuthContext`
   - Description: Create a context to manage the JWT and user state across the app.
   - Done when: `useAuth` hook is usable in any component.
 

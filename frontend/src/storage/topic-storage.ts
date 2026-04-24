@@ -1,5 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export interface Question {
+  id: string;
+  text: string;
+  answer?: string;
+  evaluation?: Evaluation;
+}
+
+export interface Evaluation {
+  status: 'correct' | 'partial' | 'incorrect' | 'pending';
+  feedback: string;
+}
+
 export interface Topic {
   id: string;
   name: string;
@@ -12,6 +24,7 @@ export interface Topic {
    * - Web: idb://... (IndexedDB marker)
    */
   audioFileUri?: string;
+  questions?: Question[];
 }
 
 const STORAGE_KEY = '@topics';

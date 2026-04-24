@@ -18,6 +18,6 @@ app.get('/health', (req, res) => {
 });
 // API Routes
 app.use('/api', routes_1.default);
-app.listen(port, () => {
-    console.log(`Backend listening at http://localhost:${port}`);
+app.listen(Number(port), '0.0.0.0', () => {
+    console.log(`Backend listening at http://0.0.0.0:${port}`);
 });

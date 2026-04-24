@@ -89,7 +89,13 @@ export const TopicDetail: React.FC<TopicDetailProps> = ({ id, onDelete }) => {
           />
         );
       case 2:
-        return <TopicInteractive />;
+        return (
+          <TopicInteractive 
+            topic={topic} 
+            onUpdateTopic={setTopic}
+            customAlert={customAlert}
+          />
+        );
       default:
         return null;
     }

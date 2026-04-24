@@ -28,10 +28,13 @@
 
 **v1 includes:**
 
-- **Topic Management:** Adding/Editing notes for a specific topic.
+- **Topic Management:** Adding/Editing notes for a specific topic, including inline editing.
 - **Script Generation:** AI-driven transformation of notes into audiobook-style scripts with examples.
 - **Audio Generation:** Using Google TTS to convert scripts into MP3.
-- **Audio Player:** Basic playback of the generated MP3 within the app.
+- **Audio Player:** Advanced audio playback including seeking, global state management, and background support.
+- **File Imports:** Support for importing .txt and .md files into topic notes.
+- **Voice-to-Note:** Capture audio input and transcribe it to notes.
+- **Web Support:** Full responsive web frontend with browser-compatible storage.
 
 **Explicitly out of scope for v1:**
 

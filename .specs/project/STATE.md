@@ -43,15 +43,8 @@
 - [x] Implement Web Frontend Support (Responsive + Persistence).
 - [x] Implement Topic Detail Tabs refactor.
 - [x] Implement Inline Notes Editing (Replace Edit Page).
-- [ ] Implement Cloud Sync & Auth (v1).
+- [x] Implement AI Question Generator (Logic + UI).
+- [ ] Implement Cloud Sync & Auth (v1) - (In Progress: Backend Auth + AuthContext done).
 - [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
 ## Deferred Ideas
-
-- AI Question/Answer loop - Deferred to Milestone 2.
-c notes.
-- [ ] Implement Note Reorganization (AI cleanup/restructuring).
-
-## Deferred Ideas
-
-- AI Question/Answer loop - Deferred to Milestone 2.

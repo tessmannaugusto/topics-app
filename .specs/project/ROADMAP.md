@@ -1,20 +1,18 @@
 # Roadmap
 
-**Current Milestone:** Milestone 1: Core Audio Experience (MVP)
-**Status:** Nearly Complete
+**Current Milestone:** Milestone 2: Interactive Learning
+**Status:** In Progress
 
 ---
 
 ## Milestone 1: Core Audio Experience (MVP)
-
-**Goal:** A basic Android app that can turn text notes into a playable audiobook using AI and Google TTS.
-**Status:** Nearly Complete
+**Status:** Complete
 
 ### Features
 
 **Topic & Note Management** - DONE
 - Create topics.
-- Add/Edit text notes for each topic.
+- Add/Edit text notes for each topic (inline editing).
 
 **AI Script Generator** - DONE
 - Transform raw notes into "audiobook language" scripts.
@@ -22,20 +20,23 @@
 
 **TTS Audio Generator** - DONE
 - Integrate Google Cloud TTS to convert scripts to MP3.
-- Save audio files locally on the device.
+- Save audio files locally/web storage.
 - Delete audio functionality.
 
 **Audio Player** - DONE
-- Basic playback controls (Play/Pause).
-- Advanced seeking functionality (Slider, Time display).
-- Global playback management (Persistent audio across navigation).
-- Background playback support.
+- Playback controls (Play/Pause, Seeking).
+- Global playback management.
+- Background playback.
 
 **File Imports** - DONE
 - Support importing .txt and .md files to populate topic notes.
 
 **Voice-to-Note** - DONE
 - Capture audio input and transcribe to notes using Google STT.
+
+**Unified Web Support** - DONE
+- Full responsive web frontend.
+- Web-specific persistence.
 
 ---
 
@@ -46,7 +47,7 @@
 
 ### Features
 
-**AI Question Generator** - SPECIFIED
+**AI Question Generator** - DONE
 - Generate relevant questions based on topic content.
 - [Specification](../features/ai-question-generator/spec.md)
 
@@ -74,27 +75,7 @@
 
 ---
 
-## Milestone 4: Multi-Platform (Web)
-
-**Goal:** Enable the "Topics" app to run in any modern web browser with a responsive desktop experience and full feature parity.
-**Status:** Planned (Specified)
-
-### Features
-
-**Unified Web Support** - SPECIFIED
-- Enable Expo web bundling.
-- [Specification](../features/web-frontend/spec.md)
-
-**Responsive Desktop UI** - SPECIFIED
-- Two-pane layout for larger screens.
-- Desktop-optimized navigation.
-
-**Web-Specific Persistence** - SPECIFIED
-- Save audio files to IndexedDB to survive page refreshes.
-
----
-
-## Milestone 5: Cloud Sync & Auth
+## Milestone 4: Cloud Sync & Auth
 
 **Goal:** Enable user accounts and cross-device data synchronization.
 **Status:** Planned (Specified)
@@ -118,7 +99,6 @@
 
 ## Future Considerations
 
-- Multi-platform support (iOS/Web).
 - Offline mode for audio playback.
 - Progress tracking and SRS (Spaced Repetition System) integration.
 

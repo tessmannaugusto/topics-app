@@ -4,6 +4,7 @@ import { Topic, saveTopic } from '../storage/topic-storage';
 import { API_URL } from '../config';
 import { audioPersistence } from '../storage/audio-persistence';
 import { useAudio } from '../context/AudioContext';
+import { useAuth } from '../context/AuthContext';
 import { theme } from '../styles/theme';
 
 interface TopicAudiobookProps {
@@ -20,6 +21,7 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [instructions, setInstructions] = useState('');
+  const { token } = useAuth();
   
   const { 
     isPlaying, 
@@ -55,6 +57,7 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: topic.name,
@@ -90,6 +93,7 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           id: topic.id,
