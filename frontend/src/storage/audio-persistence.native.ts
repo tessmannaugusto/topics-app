@@ -23,18 +23,18 @@ const nativePersistence: AudioPersistence = {
     });
   },
 
-  async getAudioUri(topicId: string, storedUri?: string): Promise<string | null> {
+  async getAudioUri(_topicId: string, storedUri?: string): Promise<string | null> {
     if (!storedUri) return null;
     const info = await FileSystem.getInfoAsync(storedUri);
     return info.exists ? storedUri : null;
   },
 
-  async getAudioBlob(topicId: string): Promise<Blob | null> {
+  async getAudioBlob(_topicId: string): Promise<Blob | null> {
     // Mobile doesn't strictly need this for now, but we'll return null for interface compliance.
     return null;
   },
 
-  async deleteAudio(topicId: string, storedUri?: string): Promise<void> {
+  async deleteAudio(_topicId: string, storedUri?: string): Promise<void> {
     if (!storedUri) return;
     const info = await FileSystem.getInfoAsync(storedUri);
     if (info.exists) {

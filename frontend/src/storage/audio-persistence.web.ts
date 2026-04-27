@@ -12,7 +12,7 @@ const webPersistence: AudioPersistence = {
     return `idb://${topicId}`;
   },
 
-  async getAudioUri(topicId: string, storedUri?: string): Promise<string | null> {
+  async getAudioUri(topicId: string, _storedUri?: string): Promise<string | null> {
     const blob = await this.getAudioBlob(topicId);
     if (!blob) return null;
     return URL.createObjectURL(blob);
@@ -23,7 +23,7 @@ const webPersistence: AudioPersistence = {
     return await get<Blob>(key) || null;
   },
 
-  async deleteAudio(topicId: string, storedUri?: string): Promise<void> {
+  async deleteAudio(topicId: string, _storedUri?: string): Promise<void> {
     const key = `${STORAGE_PREFIX}${topicId}`;
     await del(key);
   }

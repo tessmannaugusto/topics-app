@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import * as Speech from 'expo-speech';
-import { Platform } from 'react-native';
 import { audioPersistence } from '../storage/audio-persistence';
 
 interface AudioContextType {

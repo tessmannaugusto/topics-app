@@ -100,7 +100,16 @@ export default function FolderDetailScreen() {
           )
         }} 
       />
-      <TopicList folderId={folderId} />
+      <View style={styles.listHeader}>
+        <Text style={styles.listTitle}>Topics</Text>
+        <TouchableOpacity 
+          onPress={() => router.push(`/create?folderId=${folderId}`)} 
+          style={styles.addButton}
+        >
+          <Text style={styles.addButtonText}>+ Topic</Text>
+        </TouchableOpacity>
+      </View>
+      <TopicList folderId={folderId} showFab={false} />
     </View>
   );
 }
@@ -120,5 +129,26 @@ const styles = StyleSheet.create({
   headerButtonText: {
     color: theme.colors.primary,
     fontWeight: '600',
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 5,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+  },
+  addButton: {
+    padding: 5,
+  },
+  addButtonText: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

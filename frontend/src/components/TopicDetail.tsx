@@ -79,7 +79,6 @@ export const TopicDetail: React.FC<TopicDetailProps> = ({ id, onDelete }) => {
     };
 
     if (Platform.OS === 'web') {
-      const options = ['None (Uncategorized)', ...folders.map(f => f.name)];
       const choice = window.prompt(`Move to folder:\n0: None (Uncategorized)\n${folders.map((f, i) => `${i+1}: ${f.name}`).join('\n')}`);
       if (choice !== null) {
         const idx = parseInt(choice);

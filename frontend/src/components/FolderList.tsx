@@ -4,7 +4,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { getFolders, Folder } from '../storage/topic-storage';
 import { theme } from '../styles/theme';
 
-export const FolderList: React.FC<{ refreshTrigger?: number }> = ({ refreshTrigger }) => {
+export const FolderList: React.FC<{ refreshTrigger?: number, onCreateFolder?: () => void }> = ({ refreshTrigger, onCreateFolder }) => {
   const [folders, setFolders] = useState<Folder[]>([]);
   const router = useRouter();
 
@@ -35,19 +35,30 @@ export const FolderList: React.FC<{ refreshTrigger?: number }> = ({ refreshTrigg
     </TouchableOpacity>
   );
 
-  if (folders.length === 0) return null;
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Folders</Text>
-      <FlatList
-        data={folders}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      />
+      <View style={styles.header}>
+        <Text style={styles.title}>Folders</Text>
+        {onCreateFolder && (
+          <TouchableOpacity onPress={onCreateFolder} style={styles.addButton}>
+            <Text style={styles.addButtonText}>+ Folder</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      {folders.length > 0 ? (
+        <FlatList
+          data={folders}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No folders yet</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -56,15 +67,36 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 20,
-    marginBottom: 10,
     color: theme.colors.text,
+  },
+  addButton: {
+    padding: 5,
+  },
+  addButtonText: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
   },
   listContent: {
     paddingHorizontal: 15,
+  },
+  emptyContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  emptyText: {
+    color: theme.colors.textSecondary,
+    fontStyle: 'italic',
   },
   folderItem: {
     width: 100,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Platform, Alert } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { TopicList } from '../src/components/TopicList';
 import { FolderList } from '../src/components/FolderList';
 import { saveFolder } from '../src/storage/topic-storage';
@@ -51,18 +52,22 @@ export default function TopicListScreen() {
     <View style={styles.container}>
       <Stack.Screen 
         options={{ 
+          headerLeft: () => null,
           headerRight: () => (
-            <TouchableOpacity onPress={handleCreateFolder} style={styles.headerButton}>
-              <Text style={styles.headerButtonText}>+ Folder</Text>
+            <TouchableOpacity onPress={() => router.push('/config')} style={styles.headerButton}>
+              <Ionicons name="settings-outline" size={24} color={theme.colors.primary} />
             </TouchableOpacity>
           )
         }} 
       />
-      <FolderList refreshTrigger={refreshSeed} />
+      <FolderList refreshTrigger={refreshSeed} onCreateFolder={handleCreateFolder} />
       <View style={styles.listHeader}>
         <Text style={styles.listTitle}>All Topics</Text>
+        <TouchableOpacity onPress={() => router.push('/create')} style={styles.addButton}>
+          <Text style={styles.addButtonText}>+ Topic</Text>
+        </TouchableOpacity>
       </View>
-      <TopicList folderId={null} refreshTrigger={refreshSeed} />
+      <TopicList folderId={null} refreshTrigger={refreshSeed} showFab={false} />
     </View>
   );
 }
@@ -75,11 +80,10 @@ const styles = StyleSheet.create({
   headerButton: {
     marginRight: 15,
   },
-  headerButtonText: {
-    color: theme.colors.primary,
-    fontWeight: '600',
-  },
   listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 5,
@@ -88,5 +92,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: theme.colors.text,
+  },
+  addButton: {
+    padding: 5,
+  },
+  addButtonText: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

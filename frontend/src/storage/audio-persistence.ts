@@ -1,5 +1,3 @@
-import { Platform } from 'react-native';
-
 // We export the interface
 export interface AudioPersistence {
   saveAudio(topicId: string, blob: Blob): Promise<string>;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { theme } from '../styles/theme';
 import { Topic, saveTopic } from '../storage/topic-storage';
 import { pickAndReadNoteFile } from '../storage/file-import';
-import { startRecording, stopRecording, isWebSpeechSupported } from '../storage/voice-recorder';
+import { startRecording, stopRecording } from '../storage/voice-recorder';
 
 interface TopicNotesProps {
   topic: Topic;

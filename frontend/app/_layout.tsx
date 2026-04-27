@@ -25,6 +25,7 @@ export default function Layout() {
         >
           <Stack.Screen name="index" options={{ title: 'Topics' }} />
           <Stack.Screen name="create" options={{ title: 'New' }} />
+          <Stack.Screen name="config" options={{ title: 'Settings' }} />
           <Stack.Screen name="[id]" options={{ title: '' }} />
           <Stack.Screen name="edit/[id]" options={{ title: 'Edit' }} />
           <Stack.Screen name="folder/[id]" options={{ title: 'Folder' }} />

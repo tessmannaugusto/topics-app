@@ -48,7 +48,7 @@
 - [x] Implement AI Question Generator (Logic + UI).
 - [x] Implement Topic Organization (Folders).
 - [ ] Implement Cloud Sync & Auth (v1) - (In Progress: Backend Auth + AuthContext done).
-- [ ] Implement Configuration Management (API Keys).
+- [ ] Implement Configuration Management (API Keys) - (In Progress: Frontend Done).
 - [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
 ## Deferred Ideas
