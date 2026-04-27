@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, Platform, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Platform, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getTopicById, deleteTopic, Topic } from '../storage/topic-storage';
+import { getTopicById, deleteTopic, Topic, getFolders, Folder, saveTopic } from '../storage/topic-storage';
 import { theme } from '../styles/theme';
 import { TabBar } from './TabBar';
 import { TopicNotes } from './TopicNotes';
@@ -30,22 +30,27 @@ const customAlert = (title: string, message: string, onConfirm?: () => void) => 
 
 export const TopicDetail: React.FC<TopicDetailProps> = ({ id, onDelete }) => {
   const [topic, setTopic] = useState<Topic | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   
   const router = useRouter();
 
-  const loadTopic = useCallback(async () => {
+  const loadTopicAndFolders = useCallback(async () => {
     if (id) {
-      const data = await getTopicById(id);
-      if (data) {
-        setTopic(data);
+      const [topicData, foldersData] = await Promise.all([
+        getTopicById(id),
+        getFolders()
+      ]);
+      if (topicData) {
+        setTopic(topicData);
       }
+      setFolders(foldersData);
     }
   }, [id]);
 
   useEffect(() => {
-    loadTopic();
-  }, [id, loadTopic]);
+    loadTopicAndFolders();
+  }, [id, loadTopicAndFolders]);
 
   const handleDelete = async () => {
     customAlert(
@@ -64,11 +69,43 @@ export const TopicDetail: React.FC<TopicDetailProps> = ({ id, onDelete }) => {
     );
   };
 
+  const handleMoveToFolder = () => {
+    const move = async (folderId: string | null) => {
+      if (topic) {
+        const updatedTopic = { ...topic, folderId: folderId || undefined };
+        await saveTopic(updatedTopic);
+        setTopic(updatedTopic);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const options = ['None (Uncategorized)', ...folders.map(f => f.name)];
+      const choice = window.prompt(`Move to folder:\n0: None (Uncategorized)\n${folders.map((f, i) => `${i+1}: ${f.name}`).join('\n')}`);
+      if (choice !== null) {
+        const idx = parseInt(choice);
+        if (idx === 0) move(null);
+        else if (idx > 0 && idx <= folders.length) move(folders[idx-1].id);
+      }
+    } else {
+      const options = [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'None (Uncategorized)', onPress: () => move(null) },
+        ...folders.map(f => ({
+          text: f.name,
+          onPress: () => move(f.id)
+        }))
+      ];
+      Alert.alert('Move to Folder', 'Select a folder:', options as any);
+    }
+  };
+
   if (!topic) return (
     <View style={styles.loadingContainer}>
       <Text style={styles.loadingText}>Select a topic to view details</Text>
     </View>
   );
+
+  const currentFolder = folders.find(f => f.id === topic.folderId);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -107,7 +144,12 @@ export const TopicDetail: React.FC<TopicDetailProps> = ({ id, onDelete }) => {
         <View style={styles.headerTop}>
           <View style={styles.titleContainer}>
             <Text style={styles.name}>{topic.name}</Text>
-            <Text style={styles.date}>{new Date(topic.dateCreated).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.date}>{new Date(topic.dateCreated).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+              <TouchableOpacity onPress={handleMoveToFolder} style={styles.folderBadge}>
+                <Text style={styles.folderBadgeText}>📁 {currentFolder?.name || 'Uncategorized'}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
@@ -165,6 +207,23 @@ const styles = StyleSheet.create({
   date: {
     ...theme.typography.caption,
     color: theme.colors.textSecondary,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    flexWrap: 'wrap',
+  },
+  folderBadge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  folderBadgeText: {
+    fontSize: 10,
+    color: theme.colors.primary,
+    fontWeight: '600',
   },
   headerActions: {
     flexDirection: 'row',

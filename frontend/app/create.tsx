@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { saveTopic } from '../src/storage/topic-storage';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { saveTopic, getFolders, Folder } from '../src/storage/topic-storage';
 import { pickAndReadNoteFile } from '../src/storage/file-import';
 import { startRecording, stopRecording } from '../src/storage/voice-recorder';
 import { API_URL } from '../src/config';
 import { formStyles as styles } from '../src/styles/form.styles';
+import { theme } from '../src/styles/theme';
 
 export default function CreateTopic() {
+  const { folderId: initialFolderId } = useLocalSearchParams();
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    typeof initialFolderId === 'string' ? initialFolderId : null
+  );
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
+  
   const router = useRouter();
+
+  useEffect(() => {
+    const loadFolders = async () => {
+      const data = await getFolders();
+      setFolders(data);
+    };
+    loadFolders();
+  }, []);
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -22,6 +38,7 @@ export default function CreateTopic() {
       name,
       notes,
       dateCreated: new Date().toISOString(),
+      folderId: selectedFolderId || undefined,
     };
     
     await saveTopic(newTopic);
@@ -98,6 +115,49 @@ export default function CreateTopic() {
         </View>
 
         <View style={styles.field}>
+          <Text style={styles.label}>Folder</Text>
+          <TouchableOpacity 
+            style={localStyles.folderPickerButton}
+            onPress={() => setShowFolderPicker(!showFolderPicker)}
+          >
+            <Text style={localStyles.folderPickerButtonText}>
+              {selectedFolderId 
+                ? folders.find(f => f.id === selectedFolderId)?.name || 'Select Folder' 
+                : 'None (Uncategorized)'}
+            </Text>
+            <Text style={localStyles.folderPickerArrow}>{showFolderPicker ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+          
+          {showFolderPicker && (
+            <View style={localStyles.folderPickerList}>
+              <TouchableOpacity 
+                style={localStyles.folderOption}
+                onPress={() => {
+                  setSelectedFolderId(null);
+                  setShowFolderPicker(false);
+                }}
+              >
+                <Text style={[localStyles.folderOptionText, !selectedFolderId && localStyles.selectedOption]}>None (Uncategorized)</Text>
+              </TouchableOpacity>
+              {folders.map(folder => (
+                <TouchableOpacity 
+                  key={folder.id}
+                  style={localStyles.folderOption}
+                  onPress={() => {
+                    setSelectedFolderId(folder.id);
+                    setShowFolderPicker(false);
+                  }}
+                >
+                  <Text style={[localStyles.folderOptionText, selectedFolderId === folder.id && localStyles.selectedOption]}>
+                    {folder.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View style={styles.field}>
           <View style={styles.labelRow}>
             <Text style={styles.label}>Notes</Text>
             <View style={{ flexDirection: 'row' }}>
@@ -151,3 +211,45 @@ export default function CreateTopic() {
     </KeyboardAvoidingView>
   );
 }
+const localStyles = StyleSheet.create({
+  folderPickerButton: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#EEE',
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  folderPickerButtonText: {
+    fontSize: 16,
+    color: theme.colors.text,
+  },
+  folderPickerArrow: {
+    fontSize: 12,
+    color: '#999',
+  },
+  folderPickerList: {
+    marginTop: 5,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#EEE',
+    borderRadius: 8,
+    maxHeight: 200,
+    overflow: 'hidden',
+  },
+  folderOption: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  folderOptionText: {
+    fontSize: 16,
+    color: theme.colors.text,
+  },
+  selectedOption: {
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+  },
+});

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { getTopics, Topic, saveTopic } from '../storage/topic-storage';
@@ -11,6 +11,9 @@ interface TopicListProps {
   onTopicSelect?: (topicId: string) => void;
   selectedTopicId?: string;
   isSidebar?: boolean;
+  folderId?: string | null;
+  showFab?: boolean;
+  refreshTrigger?: number;
 }
 
 const customAlert = (title: string, message: string) => {
@@ -26,7 +29,10 @@ const customAlert = (title: string, message: string) => {
 export const TopicList: React.FC<TopicListProps> = ({ 
   onTopicSelect, 
   selectedTopicId,
-  isSidebar = false 
+  isSidebar = false,
+  folderId,
+  showFab = true,
+  refreshTrigger
 }) => {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
@@ -35,16 +41,23 @@ export const TopicList: React.FC<TopicListProps> = ({
   
   const router = useRouter();
 
-  const loadTopics = async () => {
-    const data = await getTopics();
+  const loadTopics = useCallback(async () => {
+    let data = await getTopics();
+    if (folderId !== undefined) {
+      data = data.filter(t => t.folderId === (folderId || undefined));
+    }
     setTopics(data);
-  };
+  }, [folderId]);
 
   useFocusEffect(
     useCallback(() => {
       loadTopics();
-    }, [])
+    }, [loadTopics])
   );
+
+  useEffect(() => {
+    loadTopics();
+  }, [loadTopics, refreshTrigger]);
 
   const handleGenerateAudio = async (topic: Topic) => {
     if (!topic.aiScript) {
@@ -173,11 +186,11 @@ export const TopicList: React.FC<TopicListProps> = ({
         ListEmptyComponent={<Text style={styles.emptyText}>No topics yet.</Text>}
       />
       
-      {!isSidebar && (
+      {!isSidebar && showFab && (
         <TouchableOpacity 
           style={styles.fab}
           activeOpacity={0.9}
-          onPress={() => router.push('/create')}
+          onPress={() => router.push(folderId ? `/create?folderId=${folderId}` : '/create')}
         >
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
