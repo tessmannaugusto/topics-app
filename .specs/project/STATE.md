@@ -13,6 +13,8 @@
 | 2026-04-15 | 0.0.0.0 Backend Host | Set backend to listen on all interfaces to fix connection refused errors. |
 | 2026-04-15 | Web Blob URLs | Use `URL.createObjectURL` for temporary audio playback on Web since `FileSystem` is native-only. |
 | 2026-04-17 | File Import for Notes | Use `expo-document-picker` to import .txt and .md files into topic notes. |
+| 2026-04-27 | Folder Organization | Group topics into folders; folders stored under `@folders`, topics reference `folderId`. |
+| 2026-04-27 | Secure API Key Storage | Store user-provided keys encrypted at rest in DB using server-side AES key. |
 
 ## Blockers
 
@@ -44,7 +46,9 @@
 - [x] Implement Topic Detail Tabs refactor.
 - [x] Implement Inline Notes Editing (Replace Edit Page).
 - [x] Implement AI Question Generator (Logic + UI).
+- [x] Implement Topic Organization (Folders).
 - [ ] Implement Cloud Sync & Auth (v1) - (In Progress: Backend Auth + AuthContext done).
+- [ ] Implement Configuration Management (API Keys).
 - [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
 ## Deferred Ideas

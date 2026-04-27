@@ -38,6 +38,11 @@
 - Full responsive web frontend.
 - Web-specific persistence.
 
+**Topic Organization (Folders)** - DONE
+- Create folders to group topics by subject.
+- Move topics between folders.
+- [Specification](../features/topic-organization/spec.md)
+
 ---
 
 ## Milestone 2: Interactive Learning
@@ -86,6 +91,11 @@
 - Email/Password Signup and Login.
 - Secure token storage.
 - [Specification](../features/cloud-sync-auth/spec.md)
+
+**User Configuration (v1)** - SPECIFIED
+- Manage Gemini API keys securely.
+- Associated with cloud account for cross-device usage.
+- [Specification](../features/config-management/spec.md)
 
 **Offline-First Sync** - SPECIFIED
 - Automatic background synchronization between local and remote DB.
