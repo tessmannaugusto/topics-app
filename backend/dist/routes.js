@@ -5,6 +5,7 @@ const generate_script_1 = require("./api/generate-script");
 const generate_audio_1 = require("./api/generate-audio");
 const transcribe_1 = require("./api/transcribe");
 const generate_questions_1 = require("./api/generate-questions");
+const evaluate_answer_1 = require("./api/evaluate-answer");
 const auth_1 = require("./api/auth");
 const validate_1 = require("./middleware/validate");
 const auth_2 = require("./middleware/auth");
@@ -18,4 +19,5 @@ router.post('/generate-script', auth_2.authenticate, (0, validate_1.validate)(ap
 router.post('/generate-audio', auth_2.authenticate, (0, validate_1.validate)(api_schemas_1.generateAudioSchema), generate_audio_1.generateAudio);
 router.post('/transcribe', auth_2.authenticate, (0, validate_1.validate)(api_schemas_1.transcribeSchema), transcribe_1.transcribe);
 router.post('/generate-questions', auth_2.authenticate, (0, validate_1.validate)(api_schemas_1.generateQuestionsSchema), generate_questions_1.generateQuestions);
+router.post('/evaluate-answer', auth_2.authenticate, (0, validate_1.validate)(api_schemas_1.evaluateAnswerSchema), evaluate_answer_1.evaluateAnswer);
 exports.default = router;

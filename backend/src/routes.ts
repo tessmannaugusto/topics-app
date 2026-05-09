@@ -3,10 +3,17 @@ import { generateScript } from './api/generate-script';
 import { generateAudio } from './api/generate-audio';
 import { transcribe } from './api/transcribe';
 import { generateQuestions } from './api/generate-questions';
+import { evaluateAnswer } from './api/evaluate-answer';
 import { signup, login } from './api/auth';
 import { validate } from './middleware/validate';
 import { authenticate } from './middleware/auth';
-import { generateScriptSchema, generateAudioSchema, transcribeSchema, generateQuestionsSchema } from './schemas/api-schemas';
+import { 
+  generateScriptSchema, 
+  generateAudioSchema, 
+  transcribeSchema, 
+  generateQuestionsSchema,
+  evaluateAnswerSchema
+} from './schemas/api-schemas';
 
 const router = Router();
 
@@ -19,5 +26,6 @@ router.post('/generate-script', authenticate, validate(generateScriptSchema), ge
 router.post('/generate-audio', authenticate, validate(generateAudioSchema), generateAudio);
 router.post('/transcribe', authenticate, validate(transcribeSchema), transcribe);
 router.post('/generate-questions', authenticate, validate(generateQuestionsSchema), generateQuestions);
+router.post('/evaluate-answer', authenticate, validate(evaluateAnswerSchema), evaluateAnswer);
 
 export default router;
