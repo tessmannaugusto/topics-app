@@ -22,10 +22,10 @@ router.post('/signup', signup);
 router.post('/login', login);
 
 // Protected API Routes
-router.post('/generate-script', authenticate, validate(generateScriptSchema), generateScript);
-router.post('/generate-audio', authenticate, validate(generateAudioSchema), generateAudio);
-router.post('/transcribe', authenticate, validate(transcribeSchema), transcribe);
-router.post('/generate-questions', authenticate, validate(generateQuestionsSchema), generateQuestions);
-router.post('/evaluate-answer', authenticate, validate(evaluateAnswerSchema), evaluateAnswer);
+router.post('/generate-script', validate(generateScriptSchema), generateScript);
+router.post('/generate-audio', validate(generateAudioSchema), generateAudio);
+router.post('/transcribe', validate(transcribeSchema), transcribe);
+router.post('/generate-questions', validate(generateQuestionsSchema), generateQuestions);
+router.post('/evaluate-answer', validate(evaluateAnswerSchema), evaluateAnswer);
 
 export default router;
