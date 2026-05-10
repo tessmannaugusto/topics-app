@@ -2,16 +2,16 @@ import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const evaluateAnswer = async (req: Request, res: Response) => {
-  const { question, answer, notes } = req.body;
+  const { question, answer, notes, apiKey: userApiKey, model: selectedModel } = req.body;
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = userApiKey || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+    return res.status(500).json({ error: 'Gemini API Key is not configured. Please provide it in Settings.' });
   }
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: selectedModel || 'gemini-1.5-flash' });
 
     const prompt = `
       You are a specialized learning assistant. Your task is to evaluate a student's answer to a specific question based on provided study notes.

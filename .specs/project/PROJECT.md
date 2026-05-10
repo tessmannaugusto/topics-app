@@ -35,15 +35,14 @@
 - **File Imports:** Support for importing .txt and .md files into topic notes.
 - **Voice-to-Note:** Capture audio input and transcribe it to notes.
 - **Web Support:** Full responsive web frontend with browser-compatible storage.
-- **Topic Organization (Folders):** Group related topics into folders for better management.
-- **User Configurations:** Allow users to provide their own Gemini API keys (v1).
+- Topic Organization (Folders): Group related topics into folders for better management.
+- User Configurations: Allow users to provide their own Gemini API keys (locally stored).
 
-**Explicitly out of scope for v1:**
+## Out of Scope
 
-- Importing .txt or .md files.
-- Generating questions about a topic.
-- Sending/Correcting answers to questions.
-- User authentication/Cloud sync.
+- Multi-user support / Cloud sync.
+- Importing .txt or .md files. (Wait, it says v1 includes this above?)
+
 
 ## Constraints
 

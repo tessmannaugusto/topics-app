@@ -3,28 +3,25 @@ import textToSpeech from '@google-cloud/text-to-speech';
 
 let client: any = null;
 
-const getClient = () => {
-  if (!client) {
-    const apiKey = process.env.GOOGLE_TTS_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not configured on the server.');
-    }
-    client = new textToSpeech.TextToSpeechClient({
-      apiKey: apiKey,
-    });
+const getClient = (userApiKey?: string) => {
+  const apiKey = userApiKey || process.env.GOOGLE_TTS_API_KEY;
+  if (!apiKey) {
+    throw new Error('Google Cloud TTS API Key is not configured. Please provide it in Settings.');
   }
-  return client;
+  return new textToSpeech.TextToSpeechClient({
+    apiKey: apiKey,
+  });
 };
 
 export const generateAudio = async (req: Request, res: Response) => {
-  const { id, script } = req.body;
+  const { id, script, apiKey: userApiKey } = req.body;
 
   if (!id || !script) {
     return res.status(400).json({ error: 'Topic ID and script are required.' });
   }
 
   try {
-    const ttsClient = getClient();
+    const ttsClient = getClient(userApiKey);
     const request = {
       input: { text: script },
       voice: { 

@@ -3,17 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateScript = void 0;
 const generative_ai_1 = require("@google/generative-ai");
 const generateScript = async (req, res) => {
-    const { name, notes, instructions } = req.body;
+    const { name, notes, instructions, apiKey: userApiKey, model: selectedModel } = req.body;
     if (!name || !notes) {
         return res.status(400).json({ error: 'Topic name and notes are required.' });
     }
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = userApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+        return res.status(500).json({ error: 'Gemini API Key is not configured. Please provide it in Settings.' });
     }
     try {
         const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const model = genAI.getGenerativeModel({ model: selectedModel || 'gemini-1.5-flash' });
         const prompt = `
       You are a Professional Educator and Audiobook Narrator. 
       Your task is to transform the following study notes into an engaging, narrative "audiobook-style" script.

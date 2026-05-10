@@ -36,6 +36,23 @@ export interface Folder {
 
 const STORAGE_KEY = '@topics';
 const FOLDERS_KEY = '@folders';
+const CONFIG_KEY = '@user_config';
+
+export interface UserConfig {
+  geminiApiKey?: string;
+  selectedModel?: string;
+}
+
+export const getUserConfig = async (): Promise<UserConfig> => {
+  const data = await AsyncStorage.getItem(CONFIG_KEY);
+  return data ? JSON.parse(data) : {};
+};
+
+export const saveUserConfig = async (config: UserConfig): Promise<void> => {
+  const existingConfig = await getUserConfig();
+  const updatedConfig = { ...existingConfig, ...config };
+  await AsyncStorage.setItem(CONFIG_KEY, JSON.stringify(updatedConfig));
+};
 
 export const saveTopic = async (topic: Topic): Promise<void> => {
   const topics = await getTopics();

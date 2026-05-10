@@ -1,55 +1,40 @@
 # Configuration & API Key Management Design
 
-## Architecture Overview
+## Architecture Overview (v1 - Local Storage)
 
-The configuration system will be deeply integrated with the `AuthContext` and the backend proxy. Instead of relying on environment variables for the Gemini API key, the backend will fetch the user's specific key from the database, decrypt it, and use it for the request.
-
-## Backend Design
-
-### Prisma Schema Update
-Add optional configuration fields to the `User` model.
-```prisma
-model User {
-  // ... existing fields
-  geminiApiKey     String?   // Encrypted
-  selectedAiModel  String?   @default("gemini-1.5-flash")
-  audioProvider    String?   @default("google-tts")
-}
-```
-
-### Security Layer (Node.js)
-A utility service will handle encryption/decryption using a system-level secret (e.g., `AES_ENCRYPTION_KEY`).
-
-```typescript
-// Example encryption logic
-function encryptKey(key: string): string;
-function decryptKey(encryptedKey: string): string;
-```
-
-### API Endpoints
-- `GET /api/user/config`: Returns `selectedAiModel`, `audioProvider`, and a masked `geminiApiKey` (e.g., `**********XyZ`).
-- `PATCH /api/user/config`: Updates the user's configuration.
+The configuration system currently relies on `AsyncStorage` on the mobile client. When making AI requests, the client fetches the stored configuration and sends the necessary parameters (API key, selected model) to the backend.
 
 ## Frontend Design
 
-### Navigation
-- Add `app/config.tsx` route.
-- Update `app/_layout.tsx` to include the `config` screen.
-- Update `app/index.tsx` header with a `TouchableOpacity` containing a gear icon (or text label "Configs" for v1).
+### Global Navigation
+- **Header Gear Icon**: Update `app/_layout.tsx` to include a `headerRight` component in `screenOptions`. This component will be a `TouchableOpacity` with a `MaterialCommunityIcons` gear icon, navigating to `/config`.
 
-### Config Screen UI
-- A simple form with:
-  - Text input for the Gemini API Key (secure text entry).
-  - (v2) Dropdown/Picker for AI Models.
-  - (v2) Dropdown/Picker for Audio Providers.
-  - "Save Changes" button.
+### Config Screen UI (`app/config.tsx`)
+- **API Key Section**: Existing masked key display and input for updates.
+- **Model Selection Section**: 
+  - A dropdown (using a simple `Modal` or a picker-like implementation) to select the Gemini model.
+  - Models: `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`.
+- **Save Action**: Saves both `geminiApiKey` and `selectedModel` to `AsyncStorage` under `@user_config`.
 
-### Logic Flow
-1. `ConfigScreen` mounts.
-2. Fetch current config from `/api/user/config`.
-3. User enters new key.
-4. `onSave` calls `PATCH /api/user/config` with the raw key.
-5. Backend encrypts and saves to DB.
+### Storage Update (`src/storage/topic-storage.ts`)
+- Update `UserConfig` interface:
+  ```typescript
+  export interface UserConfig {
+    geminiApiKey?: string;
+    selectedModel?: string; // Default: 'gemini-1.5-flash'
+  }
+  ```
+
+## Backend Design
+
+### API Schemas (`backend/src/schemas/api-schemas.ts`)
+- Update `generateScriptSchema`, `generateQuestionsSchema`, and `evaluateAnswerSchema` to include an optional `model` string field in the body.
+
+### API Logic
+- Update `generateScript.ts`, `generateQuestions.ts`, and `evaluateAnswer.ts` to:
+  1. Extract `model` from `req.body`.
+  2. Fallback to a default model if not provided (e.g., `gemini-1.5-flash`).
+  3. Pass the model name to `genAI.getGenerativeModel({ model: selectedModel })`.
 
 ## Data Flow Diagram (Mermaid)
 
@@ -57,14 +42,13 @@ function decryptKey(encryptedKey: string): string;
 sequenceDiagram
     participant App as Mobile App
     participant API as Backend Proxy
-    participant DB as PostgreSQL (Prisma)
     participant AI as Gemini AI Service
 
-    App->>API: POST /generate-script (Auth Token)
-    API->>DB: Fetch User (id)
-    DB-->>API: User Data (encryptedApiKey)
-    API->>API: Decrypt API Key
-    API->>AI: POST /v1beta/models/... (using user's API Key)
+    Note over App: User saves API Key & Model in Configs
+    App->>App: Store in AsyncStorage (@user_config)
+    
+    App->>API: POST /generate-questions (apiKey, model, ...)
+    API->>AI: POST /v1beta/models/{model}:generateContent (using apiKey)
     AI-->>API: AI Response
-    API-->>App: Generated Script
+    API-->>App: Generated Questions
 ```

@@ -3,28 +3,25 @@ import speech from '@google-cloud/speech';
 
 let client: any = null;
 
-const getClient = () => {
-  if (!client) {
-    const apiKey = process.env.GOOGLE_TTS_API_KEY; // Reusing the same key
-    if (!apiKey) {
-      throw new Error('GOOGLE_TTS_API_KEY is not configured on the server.');
-    }
-    client = new speech.SpeechClient({
-      apiKey: apiKey,
-    });
+const getClient = (userApiKey?: string) => {
+  const apiKey = userApiKey || process.env.GOOGLE_TTS_API_KEY; // Reusing the same key
+  if (!apiKey) {
+    throw new Error('Google Cloud API Key is not configured. Please provide it in Settings.');
   }
-  return client;
+  return new speech.SpeechClient({
+    apiKey: apiKey,
+  });
 };
 
 export const transcribe = async (req: Request, res: Response) => {
-  const { audioContent, platform } = req.body;
+  const { audioContent, platform, apiKey: userApiKey } = req.body;
 
   if (!audioContent) {
     return res.status(400).json({ error: 'Audio content is required.' });
   }
 
   try {
-    const speechClient = getClient();
+    const speechClient = getClient(userApiKey);
 
     // Configure based on platform
     // iOS (expo-av LINEARPCM) -> LINEAR16, 16000Hz

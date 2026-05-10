@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, TextInput, Platform, TouchableOpacity, StyleSheet } from 'react-native';
-import { Topic, saveTopic } from '../storage/topic-storage';
+import { Topic, saveTopic, getUserConfig } from '../storage/topic-storage';
 import { API_URL } from '../config';
 import { audioPersistence } from '../storage/audio-persistence';
 import { useAudio } from '../context/AudioContext';
-import { useAuth } from '../context/AuthContext';
 import { theme } from '../styles/theme';
 
 interface TopicAudiobookProps {
@@ -21,7 +20,6 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [instructions, setInstructions] = useState('');
-  const { token } = useAuth();
   
   const { 
     isPlaying, 
@@ -53,16 +51,18 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
     setIsGenerating(true);
 
     try {
+      const config = await getUserConfig();
       const response = await fetch(`${API_URL}/generate-script`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: topic.name,
           notes: topic.notes,
           instructions: instructions,
+          apiKey: config.geminiApiKey,
+          model: config.selectedModel,
         }),
       });
 
@@ -89,15 +89,16 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
     setIsGeneratingAudio(true);
 
     try {
+      const config = await getUserConfig();
       const response = await fetch(`${API_URL}/generate-audio`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           id: topic.id,
           script: topic.aiScript,
+          apiKey: config.geminiApiKey,
         }),
       });
 

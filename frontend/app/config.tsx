@@ -11,14 +11,14 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useAuth } from '../src/context/AuthContext';
-import { API_URL } from '../src/config';
+import { Picker } from '@react-native-picker/picker';
 import { theme } from '../src/styles/theme';
+import { getUserConfig, saveUserConfig } from '../src/storage/topic-storage';
 
 export default function ConfigScreen() {
-  const { token } = useAuth();
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [maskedKey, setMaskedKey] = useState('');
+  const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -29,20 +29,15 @@ export default function ConfigScreen() {
   const fetchConfig = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_URL}/user/config`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.geminiApiKey) {
-          setMaskedKey(data.geminiApiKey);
-        }
-      } else if (response.status !== 404) {
-        // 404 might mean no config yet
-        console.error('Failed to fetch config', await response.text());
+      const config = await getUserConfig();
+      if (config.geminiApiKey) {
+        const masked = config.geminiApiKey.length > 8 
+          ? `${config.geminiApiKey.substring(0, 4)}...${config.geminiApiKey.substring(config.geminiApiKey.length - 4)}`
+          : '****';
+        setMaskedKey(masked);
+      }
+      if (config.selectedModel) {
+        setSelectedModel(config.selectedModel);
       }
     } catch (error) {
       console.error('Error fetching config:', error);
@@ -52,38 +47,25 @@ export default function ConfigScreen() {
   };
 
   const handleSave = async () => {
-    if (!geminiApiKey.trim() && !maskedKey) {
-      Alert.alert('Error', 'Please enter an API key');
-      return;
-    }
-
     try {
       setIsSaving(true);
-      const response = await fetch(`${API_URL}/user/config`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          geminiApiKey: geminiApiKey.trim() || undefined,
-        }),
+      await saveUserConfig({
+        geminiApiKey: geminiApiKey.trim() || undefined,
+        selectedModel,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.geminiApiKey) {
-          setMaskedKey(data.geminiApiKey);
-          setGeminiApiKey('');
-        }
-        Alert.alert('Success', 'Configuration saved successfully');
-      } else {
-        const errorData = await response.json();
-        Alert.alert('Error', errorData.error || 'Failed to save configuration');
+      
+      if (geminiApiKey.trim()) {
+        const masked = geminiApiKey.trim().length > 8 
+          ? `${geminiApiKey.trim().substring(0, 4)}...${geminiApiKey.trim().substring(geminiApiKey.trim().length - 4)}`
+          : '****';
+        setMaskedKey(masked);
+        setGeminiApiKey('');
       }
+      
+      Alert.alert('Success', 'Configuration saved locally');
     } catch (error) {
       console.error('Error saving config:', error);
-      Alert.alert('Error', 'An unexpected error occurred');
+      Alert.alert('Error', 'Failed to save configuration');
     } finally {
       setIsSaving(false);
     }
@@ -106,11 +88,11 @@ export default function ConfigScreen() {
         <View style={styles.section}>
           <Text style={styles.label}>Gemini API Key</Text>
           <Text style={styles.description}>
-            Used for generating scripts and questions. Your key is encrypted and stored securely.
+            Used for generating scripts and questions. Your key is stored locally on this device.
           </Text>
           <TextInput
             style={styles.input}
-            placeholder={maskedKey ? maskedKey : "Enter your Gemini API Key"}
+            placeholder={maskedKey ? "Stored (Enter new key to update)" : "Enter your Gemini API Key"}
             placeholderTextColor={theme.colors.textSecondary}
             value={geminiApiKey}
             onChangeText={setGeminiApiKey}
@@ -120,9 +102,24 @@ export default function ConfigScreen() {
           />
           {maskedKey ? (
             <Text style={styles.infoText}>
-              Current key: {maskedKey} (Enter new key to update)
+              Current key: {maskedKey}
             </Text>
           ) : null}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>AI Model</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedModel}
+              onValueChange={(itemValue: string) => setSelectedModel(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Gemini 1.5 Flash" value="gemini-1.5-flash" />
+              <Picker.Item label="Gemini 1.5 Pro" value="gemini-1.5-pro" />
+              <Picker.Item label="Gemini 2.0 Flash" value="gemini-2.0-flash" />
+            </Picker>
+          </View>
         </View>
 
         <TouchableOpacity
@@ -178,6 +175,18 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     borderWidth: 1,
     borderColor: theme.colors.border,
+  },
+  pickerContainer: {
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    overflow: 'hidden',
+    height: 50,
+    justifyContent: 'center',
+  },
+  picker: {
+    color: theme.colors.text,
   },
   infoText: {
     marginTop: 8,

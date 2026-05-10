@@ -4,9 +4,7 @@ import { generateAudio } from './api/generate-audio';
 import { transcribe } from './api/transcribe';
 import { generateQuestions } from './api/generate-questions';
 import { evaluateAnswer } from './api/evaluate-answer';
-import { signup, login } from './api/auth';
 import { validate } from './middleware/validate';
-import { authenticate } from './middleware/auth';
 import { 
   generateScriptSchema, 
   generateAudioSchema, 
@@ -17,11 +15,7 @@ import {
 
 const router = Router();
 
-// Auth endpoints
-router.post('/signup', signup);
-router.post('/login', login);
-
-// Protected API Routes
+// API Routes
 router.post('/generate-script', validate(generateScriptSchema), generateScript);
 router.post('/generate-audio', validate(generateAudioSchema), generateAudio);
 router.post('/transcribe', validate(transcribeSchema), transcribe);

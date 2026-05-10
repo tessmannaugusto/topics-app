@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform } from 'react-native';
 import { theme } from '../styles/theme';
-import { Topic, saveTopic } from '../storage/topic-storage';
+import { Topic, saveTopic, getUserConfig } from '../storage/topic-storage';
 import { API_URL } from '../config';
-import { useAuth } from '../context/AuthContext';
 import { startRecording, stopRecording } from '../storage/voice-recorder';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -24,7 +23,6 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
-  const { token } = useAuth();
 
   // Load existing answer when question changes
   useEffect(() => {
@@ -34,11 +32,6 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
   }, [currentIndex, topic.questions]);
 
   const handleGenerateQuestions = async () => {
-    if (!token) {
-      customAlert('Auth Error', 'You must be logged in to generate questions.');
-      return;
-    }
-
     if (topic.questions && topic.questions.length > 0) {
       customAlert(
         'Regenerate Questions',
@@ -53,17 +46,19 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
   const performGeneration = async () => {
     setIsGenerating(true);
     try {
+      const config = await getUserConfig();
       const response = await fetch(`${API_URL}/generate-questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: topic.name,
           notes: topic.notes,
           script: topic.aiScript,
-          count: 5
+          count: 5,
+          apiKey: config.geminiApiKey,
+          model: config.selectedModel,
         }),
       });
 
@@ -108,16 +103,18 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
 
     setIsEvaluating(true);
     try {
+      const config = await getUserConfig();
       const response = await fetch(`${API_URL}/evaluate-answer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           question: topic.questions[currentIndex].text,
           answer: tempAnswer,
-          notes: topic.notes
+          notes: topic.notes,
+          apiKey: config.geminiApiKey,
+          model: config.selectedModel,
         }),
       });
 
@@ -180,13 +177,17 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
           // Native STT via Backend
           setIsTranscribing(true);
           try {
+            const config = await getUserConfig();
             const response = await fetch(`${API_URL}/transcribe`, {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
               },
-              body: JSON.stringify({ audio: result.audioBase64 }),
+              body: JSON.stringify({ 
+                audioContent: result.audioBase64,
+                apiKey: config.geminiApiKey,
+                platform: Platform.OS
+              }),
             });
             const data = await response.json();
             if (response.ok && data.transcript) {

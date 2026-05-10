@@ -49,8 +49,10 @@
 - [x] Implement Topic Organization (Folders).
 - [x] Implement Interactive Responses (Text/Voice answers).
 - [x] Implement AI Evaluation & Feedback (Backend + UI).
-- [ ] Implement Cloud Sync & Auth (v1) - (In Progress: Backend Auth + AuthContext done).
-- [ ] Implement Configuration Management (API Keys) - (In Progress: Frontend Done).
+- [ ] Remove Authentication (Done: Backend & Frontend cleaned up).
+- [ ] Implement Configuration Management (API Keys) - (Done: Local storage implemented).
 - [ ] Implement Note Reorganization (AI cleanup/restructuring).
 
 ## Deferred Ideas
+
+- Cloud Sync & Multi-user support (Auth removed in May 2026 to simplify for single-user).

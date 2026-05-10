@@ -2,20 +2,20 @@ import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const generateScript = async (req: Request, res: Response) => {
-  const { name, notes, instructions } = req.body;
+  const { name, notes, instructions, apiKey: userApiKey, model: selectedModel } = req.body;
 
   if (!name || !notes) {
     return res.status(400).json({ error: 'Topic name and notes are required.' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = userApiKey || process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+    return res.status(500).json({ error: 'Gemini API Key is not configured. Please provide it in Settings.' });
   }
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: selectedModel || 'gemini-1.5-flash' });
 
     const prompt = `
       You are a Professional Educator and Audiobook Narrator. 
