@@ -252,14 +252,25 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
           {isGenerating ? (
             <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: theme.spacing.xl }} />
           ) : (
-            <TouchableOpacity 
-              style={styles.primaryButton} 
-              onPress={handleGenerateQuestions}
-              disabled={!topic.notes || topic.notes.trim().length === 0}
-            >
-              <Text style={styles.primaryButtonText}>GENERATE QUESTIONS</Text>
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity
+                style={[
+                  styles.primaryButton,
+                  (!topic.notes || topic.notes.trim().length < 50) && !topic.aiScript && styles.disabledButton
+                ]}
+                onPress={handleGenerateQuestions}
+                disabled={(!topic.notes || topic.notes.trim().length < 50) && !topic.aiScript}
+              >
+                <Text style={styles.primaryButtonText}>GENERATE QUESTIONS</Text>
+              </TouchableOpacity>
+              {(!topic.notes || topic.notes.trim().length < 50) && !topic.aiScript && (
+                <Text style={styles.warningText}>
+                  Add more notes (at least 50 chars) or generate an audio script to start.
+                </Text>
+              )}
+            </View>
           )}
+
         </View>
       ) : (
         <View style={styles.questionSection}>
@@ -596,6 +607,12 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     borderColor: theme.colors.border,
+  },
+  warningText: {
+    ...theme.typography.caption,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginTop: theme.spacing.sm,
   },
   disabledButtonText: {
     color: theme.colors.textSecondary,

@@ -54,7 +54,7 @@ Passive learning (listening to the generated audio) is effective, but active rec
 
 ## Edge Cases
 
-- WHEN the topic notes are too short (e.g., < 50 characters) THEN the "Generate Questions" button SHALL be disabled or show a warning.
+- WHEN the topic notes AND the AI-generated script are both missing or too short (e.g., < 50 characters) THEN the "Generate Questions" button SHALL be disabled.
 - WHEN the AI returns malformed JSON THEN the system SHALL show an error and allow the user to retry.
 - WHEN there is no network connection THEN the system SHALL show an offline error.
 - WHEN the user updates the topic notes THEN the system SHALL prompt the user that existing questions may be outdated.

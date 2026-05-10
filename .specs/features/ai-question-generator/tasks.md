@@ -26,6 +26,11 @@
     - **Done when**: Clicking a button triggers the API call and saves questions to `AsyncStorage`.
     - **Verification**: Console logs show questions being received and saved.
 
+- [ ] **Task AQG-4.1: Add Content Validation**
+    - **What**: Disable "Generate Questions" button if `notes` length < 50 characters AND `aiScript` is empty.
+    - **Done when**: Generate button state is updated based on content availability.
+    - **Verification**: Button is disabled when topic content is insufficient.
+
 - [x] **Task AQG-5: Build Question Display UI**
     - **What**: Create a `QuestionSection` component in `app/[id].tsx` that displays questions one by one with navigation (Next/Prev).
     - **Done when**: User can cycle through generated questions.
