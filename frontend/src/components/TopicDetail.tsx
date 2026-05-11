@@ -159,7 +159,7 @@ export const TopicDetail: React.FC<TopicDetailProps> = ({ id, onDelete }) => {
       </View>
 
       <TabBar 
-        tabs={['Notes', 'Audiobook', 'Interactive']} 
+        tabs={['Notes', 'Script and Audio', 'Interactive']} 
         activeTab={activeTab} 
         onTabChange={setActiveTab} 
       />

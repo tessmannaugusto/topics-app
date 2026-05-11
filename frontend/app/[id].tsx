@@ -4,7 +4,7 @@ import { TopicDetail } from '../src/components/TopicDetail';
 import { TopicList } from '../src/components/TopicList';
 import { ResponsiveLayout, BREAKPOINT } from '../src/components/ResponsiveLayout';
 import { useWindowDimensions } from 'react-native';
-import { getTopicById, Topic } from '../src/storage/topic-storage';
+import { getTopicById, getTopics, Topic } from '../src/storage/topic-storage';
 
 export default function TopicDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -16,8 +16,13 @@ export default function TopicDetailScreen() {
 
   const isDesktop = width >= BREAKPOINT;
 
+  const [allTopics, setAllTopics] = useState<Topic[]>([]);
+
   useEffect(() => {
-    const loadTopic = async () => {
+    const loadTopics = async () => {
+      const topics = await getTopics();
+      setAllTopics(topics);
+      
       const topicId = typeof id === 'string' ? id : selectedId;
       if (topicId) {
         const data = await getTopicById(topicId);
@@ -26,7 +31,7 @@ export default function TopicDetailScreen() {
         }
       }
     };
-    loadTopic();
+    loadTopics();
   }, [id, selectedId]);
 
   const handleTopicSelect = (newId: string) => {
@@ -40,8 +45,12 @@ export default function TopicDetailScreen() {
 
   const currentId = typeof id === 'string' ? id : selectedId;
 
-  // Sidebar is only shown if the topic belongs to a folder
-  const sidebar = currentTopic?.folderId ? (
+  // Sidebar is only shown if the topic belongs to a folder AND that folder has multiple topics
+  const folderTopics = currentTopic?.folderId 
+    ? allTopics.filter(t => t.folderId === currentTopic.folderId)
+    : [];
+    
+  const sidebar = (currentTopic?.folderId && folderTopics.length > 1) ? (
     <TopicList 
       onTopicSelect={handleTopicSelect} 
       selectedTopicId={currentId || undefined} 

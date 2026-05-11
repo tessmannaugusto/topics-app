@@ -16,10 +16,14 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({ sidebar, con
   if (isDesktop) {
     return (
       <View style={styles.desktopContainer}>
-        <View style={styles.sidebar}>
-          {sidebar}
-        </View>
-        <View style={styles.divider} />
+        {sidebar && (
+          <>
+            <View style={styles.sidebar}>
+              {sidebar}
+            </View>
+            <View style={styles.divider} />
+          </>
+        )}
         <View style={styles.content}>
           {content}
         </View>

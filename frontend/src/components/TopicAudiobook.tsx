@@ -218,7 +218,7 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
       {topic.audioFileUri && (
         <View style={styles.audioSection}>
           <View style={styles.audioHeader}>
-            <Text style={styles.audioTitle}>Audiobook</Text>
+            <Text style={styles.audioTitle}>Script and Audio</Text>
             <View style={{ flexDirection: 'row' }}>
               {Platform.OS === 'web' && (
                 <TouchableOpacity onPress={handleDownload} style={[styles.deleteAudioButton, { marginRight: 10, backgroundColor: theme.colors.primary }]}>
