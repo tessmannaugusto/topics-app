@@ -11,7 +11,7 @@ export const evaluateAnswer = async (req: Request, res: Response) => {
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: selectedModel || 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: selectedModel || 'gemini-2.5-flash' });
 
     const prompt = `
       You are a specialized learning assistant. Your task is to evaluate a student's answer to a specific question based on provided study notes.

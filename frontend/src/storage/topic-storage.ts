@@ -49,9 +49,7 @@ export const getUserConfig = async (): Promise<UserConfig> => {
 };
 
 export const saveUserConfig = async (config: UserConfig): Promise<void> => {
-  const existingConfig = await getUserConfig();
-  const updatedConfig = { ...existingConfig, ...config };
-  await AsyncStorage.setItem(CONFIG_KEY, JSON.stringify(updatedConfig));
+  await AsyncStorage.setItem(CONFIG_KEY, JSON.stringify(config));
 };
 
 export const saveTopic = async (topic: Topic): Promise<void> => {

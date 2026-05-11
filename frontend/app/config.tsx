@@ -18,7 +18,7 @@ import { getUserConfig, saveUserConfig } from '../src/storage/topic-storage';
 export default function ConfigScreen() {
   const [geminiApiKey, setGeminiApiKey] = useState('');
   const [maskedKey, setMaskedKey] = useState('');
-  const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -49,10 +49,16 @@ export default function ConfigScreen() {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      await saveUserConfig({
-        geminiApiKey: geminiApiKey.trim() || undefined,
-        selectedModel,
-      });
+      console.log('Saving config with model:', selectedModel);
+      
+      const existingConfig = await getUserConfig();
+      const newConfig = {
+        geminiApiKey: geminiApiKey.trim() || existingConfig.geminiApiKey,
+        selectedModel: selectedModel,
+      };
+      
+      console.log('Saving new config:', newConfig);
+      await saveUserConfig(newConfig);
       
       if (geminiApiKey.trim()) {
         const masked = geminiApiKey.trim().length > 8 
@@ -62,10 +68,11 @@ export default function ConfigScreen() {
         setGeminiApiKey('');
       }
       
+      console.log('Config saved successfully');
       Alert.alert('Success', 'Configuration saved locally');
     } catch (error) {
-      console.error('Error saving config:', error);
-      Alert.alert('Error', 'Failed to save configuration');
+      console.error('CRITICAL Error saving config:', error);
+      Alert.alert('Error', `Failed to save configuration: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsSaving(false);
     }
@@ -115,9 +122,7 @@ export default function ConfigScreen() {
               onValueChange={(itemValue: string) => setSelectedModel(itemValue)}
               style={styles.picker}
             >
-              <Picker.Item label="Gemini 1.5 Flash" value="gemini-1.5-flash" />
-              <Picker.Item label="Gemini 1.5 Pro" value="gemini-1.5-pro" />
-              <Picker.Item label="Gemini 2.0 Flash" value="gemini-2.0-flash" />
+              <Picker.Item label="Gemini 2.5 Flash" value="gemini-2.5-flash" />
             </Picker>
           </View>
         </View>
