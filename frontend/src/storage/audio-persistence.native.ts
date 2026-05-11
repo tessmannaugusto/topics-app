@@ -1,5 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
-import { AudioPersistence } from './audio-persistence';
+import { AudioPersistence } from './audio-persistence.types';
+
+export * from './audio-persistence.types';
 
 const nativePersistence: AudioPersistence = {
   async saveAudio(topicId: string, blob: Blob): Promise<string> {
@@ -43,4 +45,5 @@ const nativePersistence: AudioPersistence = {
   }
 };
 
+export const audioPersistence = nativePersistence;
 export default nativePersistence;

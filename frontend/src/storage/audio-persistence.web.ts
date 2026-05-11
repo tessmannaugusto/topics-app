@@ -1,5 +1,7 @@
 import { get, set, del } from 'idb-keyval';
-import { AudioPersistence } from './audio-persistence';
+import { AudioPersistence } from './audio-persistence.types';
+
+export * from './audio-persistence.types';
 
 const STORAGE_PREFIX = 'audio_';
 
@@ -29,4 +31,5 @@ const webPersistence: AudioPersistence = {
   }
 };
 
+export const audioPersistence = webPersistence;
 export default webPersistence;
