@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, TextInput, Platform } from 'react-native';
 import { theme } from '../styles/theme';
 import { Topic, saveTopic, getUserConfig } from '../storage/topic-storage';
+import { getOrderedConfigs } from '../lib/ai-utils';
 import { API_URL } from '../config';
 import { startRecording, stopRecording } from '../storage/voice-recorder';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -47,6 +48,12 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
     setIsGenerating(true);
     try {
       const config = await getUserConfig();
+      const configs = getOrderedConfigs(config);
+
+      if (configs.length === 0) {
+        throw new Error('No AI provider configured. Please go to Settings.');
+      }
+
       const response = await fetch(`${API_URL}/generate-questions`, {
         method: 'POST',
         headers: {
@@ -57,8 +64,7 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
           notes: topic.notes,
           script: topic.aiScript,
           count: 5,
-          apiKey: config.geminiApiKey,
-          model: config.selectedModel,
+          configs,
         }),
       });
 
@@ -104,6 +110,12 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
     setIsEvaluating(true);
     try {
       const config = await getUserConfig();
+      const configs = getOrderedConfigs(config);
+
+      if (configs.length === 0) {
+        throw new Error('No AI provider configured. Please go to Settings.');
+      }
+
       const response = await fetch(`${API_URL}/evaluate-answer`, {
         method: 'POST',
         headers: {
@@ -113,8 +125,7 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
           question: topic.questions[currentIndex].text,
           answer: tempAnswer,
           notes: topic.notes,
-          apiKey: config.geminiApiKey,
-          model: config.selectedModel,
+          configs,
         }),
       });
 
@@ -185,7 +196,7 @@ export const TopicInteractive: React.FC<TopicInteractiveProps> = ({
               },
               body: JSON.stringify({ 
                 audioContent: result.audioBase64,
-                apiKey: config.geminiApiKey,
+                apiKey: config.providers.google.apiKey,
                 platform: Platform.OS
               }),
             });

@@ -64,6 +64,12 @@
 - Correct user answers and provide feedback on accuracy.
 - [Specification](../features/ai-evaluation-feedback/spec.md)
 
+**Multi-Provider AI Integration** - DONE
+- Support Google, OpenAI, and Anthropic.
+- Local API key management and masking.
+- Automatic model and provider fallback.
+- [Specification](../features/multi-provider-ai/spec.md)
+
 ---
 
 ## Milestone 3: Content Ingestion & Polishing

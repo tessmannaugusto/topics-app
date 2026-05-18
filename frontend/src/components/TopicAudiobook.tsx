@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, TextInput, Platform, TouchableOpacity, StyleSheet } from 'react-native';
 import { Topic, saveTopic, getUserConfig } from '../storage/topic-storage';
+import { getOrderedConfigs } from '../lib/ai-utils';
 import { API_URL } from '../config';
 import { audioPersistence } from '../storage/audio-persistence';
 import { useAudio } from '../context/AudioContext';
@@ -52,6 +53,12 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
 
     try {
       const config = await getUserConfig();
+      const configs = getOrderedConfigs(config);
+
+      if (configs.length === 0) {
+        throw new Error('No AI provider configured. Please go to Settings.');
+      }
+
       const response = await fetch(`${API_URL}/generate-script`, {
         method: 'POST',
         headers: {
@@ -61,8 +68,7 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
           name: topic.name,
           notes: topic.notes,
           instructions: instructions,
-          apiKey: config.geminiApiKey,
-          model: config.selectedModel,
+          configs,
         }),
       });
 
@@ -98,7 +104,7 @@ export const TopicAudiobook: React.FC<TopicAudiobookProps> = ({
         body: JSON.stringify({
           id: topic.id,
           script: topic.aiScript,
-          apiKey: config.geminiApiKey,
+          apiKey: config.providers.google.apiKey,
         }),
       });
 

@@ -38,14 +38,49 @@ const STORAGE_KEY = '@topics';
 const FOLDERS_KEY = '@folders';
 const CONFIG_KEY = '@user_config';
 
+export interface ProviderConfig {
+  apiKey?: string;
+  model?: string;
+}
+
 export interface UserConfig {
+  /** @deprecated Use providers.google.apiKey */
   geminiApiKey?: string;
+  /** @deprecated Use providers.google.model */
   selectedModel?: string;
+
+  providers: {
+    google: ProviderConfig;
+    openai: ProviderConfig;
+    anthropic: ProviderConfig;
+  };
+  defaultProvider: 'google' | 'openai' | 'anthropic';
 }
 
 export const getUserConfig = async (): Promise<UserConfig> => {
   const data = await AsyncStorage.getItem(CONFIG_KEY);
-  return data ? JSON.parse(data) : {};
+  const config = data ? JSON.parse(data) : {};
+
+  // Migration and initialization
+  const updatedConfig: UserConfig = {
+    providers: {
+      google: {
+        apiKey: config.providers?.google?.apiKey || config.geminiApiKey || '',
+        model: config.providers?.google?.model || config.selectedModel || 'gemini-2.5-flash',
+      },
+      openai: {
+        apiKey: config.providers?.openai?.apiKey || '',
+        model: config.providers?.openai?.model || 'gpt-4o',
+      },
+      anthropic: {
+        apiKey: config.providers?.anthropic?.apiKey || '',
+        model: config.providers?.anthropic?.model || 'claude-3-5-sonnet-20240620',
+      },
+    },
+    defaultProvider: config.defaultProvider || 'google',
+  };
+
+  return updatedConfig;
 };
 
 export const saveUserConfig = async (config: UserConfig): Promise<void> => {

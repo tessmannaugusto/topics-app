@@ -1,18 +1,26 @@
 import { Request, Response } from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AiService } from '../lib/ai-providers/ai-service';
+import { normalizeConfigs } from '../lib/ai-providers/utils';
 
 export const evaluateAnswer = async (req: Request, res: Response) => {
-  const { question, answer, notes, apiKey: userApiKey, model: selectedModel } = req.body;
+  const { question, answer, notes, apiKey: userApiKey, model: selectedModel, configs } = req.body;
 
-  const apiKey = userApiKey || process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'Gemini API Key is not configured. Please provide it in Settings.' });
+  const finalConfigs = normalizeConfigs(configs, userApiKey, selectedModel);
+
+  if (finalConfigs.length === 0 && !process.env.GEMINI_API_KEY) {
+    return res.status(400).json({ error: 'No AI provider configuration provided.' });
+  }
+
+  // If no configs and we have a server-side key, add it
+  if (finalConfigs.length === 0 && process.env.GEMINI_API_KEY) {
+    finalConfigs.push({
+      name: 'google',
+      apiKey: process.env.GEMINI_API_KEY,
+      model: selectedModel || 'gemini-2.5-flash'
+    });
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: selectedModel || 'gemini-2.5-flash' });
-
     const prompt = `
       You are a specialized learning assistant. Your task is to evaluate a student's answer to a specific question based on provided study notes.
       
@@ -37,9 +45,7 @@ export const evaluateAnswer = async (req: Request, res: Response) => {
       }
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let text = response.text();
+    let text = await AiService.generateWithFallback({ prompt, configs: finalConfigs });
 
     // Clean up response if AI included markdown blocks
     if (text.includes('```json')) {
