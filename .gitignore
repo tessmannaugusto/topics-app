@@ -1,5 +1,9 @@
 # Root gitignore
 node_modules/
+backend/dist/
+backend/dist-lambda/
+frontend/dist/
 dist/
+dist-lambda/
 .DS_Store
 *.tsbuildinfo
