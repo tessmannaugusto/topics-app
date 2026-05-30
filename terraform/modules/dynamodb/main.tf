@@ -18,7 +18,6 @@ resource "aws_dynamodb_table" "topics" {
 
   global_secondary_index {
     name               = "UserIndex"
-    hash_key           = "userId"
     projection_type    = "ALL"
   }
 
